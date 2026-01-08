@@ -217,7 +217,7 @@ function showErrorMessage(message) {
 }
 
 // ============================================
-// SEARCH FUNCTIONALITY
+// SEARCH FUNCTIONALITY (UPDATED FOR MULTIPLE MATCHES)
 // ============================================
 
 function performSearch() {
@@ -228,20 +228,77 @@ function performSearch() {
         return;
     }
 
-    // Search by first name, last name, full name, or OR number
-    const student = students.find(s => 
+    // Find ALL matching students
+    const matchingStudents = students.filter(s => 
         s.firstName.toLowerCase().includes(query) || 
         s.lastName.toLowerCase().includes(query) ||
         s.fullName.toLowerCase().includes(query) ||
         s.orNumber.toLowerCase().includes(query)
     );
 
-    if (student) {
-        displayStudentInfo(student);
+    if (matchingStudents.length === 1) {
+        // Only one match - display directly
+        displayStudentInfo(matchingStudents[0]);
+    } else if (matchingStudents.length > 1) {
+        // Multiple matches - let user choose
+        displayMultipleMatches(matchingStudents);
     } else {
+        // No matches found
         displayNoResults();
     }
 }
+
+function displayMultipleMatches(matches) {
+    studentInfo.innerHTML = `
+        <div class="fade-in space-y-4">
+            <div class="bg-yellow-50 border-3 border-yellow-300 rounded-lg p-6 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <span class="text-4xl mr-3">🔍</span>
+                    <div>
+                        <h3 class="text-xl font-bold text-yellow-800">
+                            Multiple Records Found
+                        </h3>
+                        <p class="text-yellow-700 text-sm">Found ${matches.length} students matching your search</p>
+                    </div>
+                </div>
+                <p class="text-yellow-700 mb-4 font-medium">Please select your record below:</p>
+                <div class="space-y-3">
+                    ${matches.map((student) => {
+                        const studentIndex = students.indexOf(student);
+                        return `
+                            <button onclick="selectStudent(${studentIndex})" 
+                                    class="w-full text-left bg-white hover:bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 transition-all hover:shadow-md hover:border-yellow-400 transform hover:scale-[1.02]">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="font-bold text-gray-900 text-lg">${student.fullName}</div>
+                                    <span class="text-xs font-mono bg-yellow-100 px-2 py-1 rounded border border-yellow-300">${student.orNumber}</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                                    <div>
+                                        <span class="font-medium">Date:</span> ${student.date}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Scholarship:</span> ${student.scholarshipType}
+                                    </div>
+                                </div>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="mt-4 p-3 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                    <p class="text-sm text-blue-700">
+                        💡 <strong>Tip:</strong> Search using your OR Number for exact matches
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+    searchResults.classList.remove('hidden');
+}
+
+// Add this function to window so it can be called from onclick
+window.selectStudent = function(index) {
+    displayStudentInfo(students[index]);
+};
 
 function displayStudentInfo(student) {
     // Since all students in the list are paid, always show "Paid" status
@@ -297,6 +354,9 @@ function displayStudentInfo(student) {
                         🎉 Your contribution has been successfully received. Thank you!
                     </p>
                 </div>
+                <button onclick="performSearch()" class="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-all border-2 border-gray-300">
+                    ← Back to Search Results
+                </button>
             </div>
         </div>
     `;
