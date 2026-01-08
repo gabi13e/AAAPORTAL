@@ -3,10 +3,10 @@
 // ============================================
 
 const GOOGLE_SHEETS_CONFIG = {
-    SHEET_ID: '1T5JvxVPCYId0Gz6NBY-C6oUTY_M_JjQk-aJD1Jt0ReM',  // Get from URL - 44 characters long!
+    SHEET_ID: '1T5JvxVPCYId0Gz6NBY-C6oUTY_M_JjQk-aJD1Jt0ReM',  
     API_KEY: 'AIzaSyBzGsup0tLQeMo91mCUXgDKsZ1lRl6pZ-E',
     SHEET_NAME: 'OVERALL LIST',
-    RANGE: 'OVERALL LIST!A:E'  // Must match SHEET_NAME!
+    RANGE: 'OVERALL LIST!A:E'  
 };
 
 // ============================================
@@ -15,6 +15,44 @@ const GOOGLE_SHEETS_CONFIG = {
 
 let students = [];
 let isLoading = false;
+
+// ============================================
+// AUTHENTICATION FUNCTIONS
+// ============================================
+
+function checkAuthentication() {
+    const session = localStorage.getItem('adminSession') || sessionStorage.getItem('adminSession');
+    
+    if (session) {
+        try {
+            const data = JSON.parse(session);
+            return data.isLoggedIn === true;
+        } catch (e) {
+            return false;
+        }
+    }
+    return false;
+}
+
+function logout() {
+    localStorage.removeItem('adminSession');
+    sessionStorage.removeItem('adminSession');
+    showStudentView();
+    showLogoutMessage();
+}
+
+function showLogoutMessage() {
+    const message = document.createElement('div');
+    message.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
+    message.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <span>✓</span>
+            <span>Logged out successfully</span>
+        </div>
+    `;
+    document.body.appendChild(message);
+    setTimeout(() => message.remove(), 3000);
+}
 
 // ============================================
 // GOOGLE SHEETS API FUNCTIONS
@@ -105,10 +143,16 @@ const cancelEdit = document.getElementById('cancelEdit');
 // ============================================
 
 function showAdminPanel() {
+    // Check authentication
+    if (!checkAuthentication()) {
+        window.location.href = 'login.html';
+        return;
+    }
+
     heroSection.style.display = 'none';
     adminSection.classList.remove('hidden');
     renderStudentsTable();
-    showSetupInstructions();
+    addLogoutButton();
 }
 
 function showStudentView() {
@@ -116,6 +160,20 @@ function showStudentView() {
     heroSection.style.display = 'block';
     searchResults.classList.add('hidden');
     clearForm();
+}
+
+function addLogoutButton() {
+    // Check if logout button already exists
+    if (document.getElementById('logoutBtn')) return;
+
+    const backToHomeBtn = document.getElementById('backToHome');
+    const logoutBtn = document.createElement('button');
+    logoutBtn.id = 'logoutBtn';
+    logoutBtn.className = 'px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all';
+    logoutBtn.innerHTML = '🚪 Logout';
+    logoutBtn.addEventListener('click', logout);
+    
+    backToHomeBtn.parentElement.insertBefore(logoutBtn, backToHomeBtn.nextSibling);
 }
 
 // ============================================
@@ -156,65 +214,6 @@ function showErrorMessage(message) {
     `;
     document.body.appendChild(errorDiv);
     setTimeout(() => errorDiv.remove(), 5000);
-}
-
-function showSetupInstructions() {
-    const existingInstructions = document.getElementById('setupInstructions');
-    if (existingInstructions) return;
-
-    const instructionsDiv = document.createElement('div');
-    instructionsDiv.id = 'setupInstructions';
-    instructionsDiv.className = 'bg-yellow-50 border-3 border-yellow-300 rounded-2xl p-6 mb-6 shadow-lg';
-    instructionsDiv.innerHTML = `
-        <div class="flex items-start space-x-4">
-            <div class="text-3xl">⚙️</div>
-            <div class="flex-1">
-                <h3 class="text-xl font-bold text-yellow-800 mb-3">Google Sheets Setup Instructions</h3>
-                <div class="text-sm text-yellow-700 space-y-2">
-                    <p><strong>Current Status:</strong> ${students.length > 5 ? '✅ Connected to Google Sheets' : '⚠️ Using sample data (Not connected)'}</p>
-                    
-                    <details class="mt-4">
-                        <summary class="cursor-pointer font-bold text-blue-700 hover:text-blue-900">Click to view setup steps</summary>
-                        <div class="mt-3 ml-4 space-y-2">
-                            <p class="mt-3"><strong>Step 1: Create Google Sheet</strong></p>
-                            <ul class="list-disc ml-6 space-y-1 text-xs">
-                                <li>Go to Google Sheets and create a new spreadsheet</li>
-                                <li>Keep the sheet tab name as "Sheet1" (or update SHEET_NAME in config)</li>
-                                <li>Add headers in row 1: <strong>FIRST NAME | LAST NAME | RECEIPT NO | DATE | SCHOLARSHIP TYPE</strong></li>
-                                <li>Add your scholar data starting from row 2</li>
-                                <li>Example data: Juan | Dela Cruz | RCP-001 | 2025-01-01 | Academic Scholar</li>
-                            </ul>
-                            
-                            <p class="mt-3"><strong>Step 2: Get Sheet ID</strong></p>
-                            <ul class="list-disc ml-6 space-y-1 text-xs">
-                                <li>From URL: docs.google.com/spreadsheets/d/<strong>[COPY_THIS_PART]</strong>/edit</li>
-                            </ul>
-                            
-                            <p class="mt-3"><strong>Step 3: Enable Google Sheets API</strong></p>
-                            <ul class="list-disc ml-6 space-y-1 text-xs">
-                                <li>Go to Google Cloud Console (console.cloud.google.com)</li>
-                                <li>Create new project or select existing</li>
-                                <li>Enable "Google Sheets API"</li>
-                                <li>Create Credentials → API Key</li>
-                            </ul>
-                            
-                            <p class="mt-3"><strong>Step 4: Update Configuration</strong></p>
-                            <ul class="list-disc ml-6 space-y-1 text-xs">
-                                <li>Open script.js file</li>
-                                <li>Replace SHEET_ID and API_KEY at the top (lines 7-8)</li>
-                                <li>Make sure Sheet is set to "Anyone with link can view"</li>
-                            </ul>
-                            
-                            <p class="mt-3 text-red-600"><strong>⚠️ Important:</strong> This setup only allows reading data. To enable add/edit/delete, OAuth2 authentication is required.</p>
-                        </div>
-                    </details>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const adminContent = adminSection.querySelector('.container > .bg-white');
-    adminContent.insertBefore(instructionsDiv, adminContent.children[1]);
 }
 
 // ============================================
@@ -410,7 +409,11 @@ function clearForm() {
 // EVENT LISTENERS
 // ============================================
 
-adminBtn.addEventListener('click', showAdminPanel);
+adminBtn.addEventListener('click', () => {
+    // Redirect to login page instead of showing admin directly
+    window.location.href = 'login.html';
+});
+
 backToHome.addEventListener('click', showStudentView);
 
 searchBtn.addEventListener('click', performSearch);
@@ -433,6 +436,17 @@ window.deleteStudent = deleteStudent;
 // Load data on page load
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Student Clearance System Starting...');
+    
+    // Check if admin parameter is in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') === 'true') {
+        if (checkAuthentication()) {
+            showAdminPanel();
+        } else {
+            window.location.href = 'login.html';
+        }
+    }
+    
     console.log('📊 Attempting to connect to Google Sheets...');
     
     const success = await loadStudentsFromSheets();
