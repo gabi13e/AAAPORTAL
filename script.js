@@ -82,7 +82,7 @@ async function loadStudentsFromSheets() {
                     firstName: (row[0] || '').trim(),
                     lastName: (row[1] || '').trim(),
                     fullName: `${(row[0] || '').trim()} ${(row[1] || '').trim()}`.trim(),
-                    receiptNo: (row[2] || 'N/A').trim(),
+                    orNumber: (row[2] || 'N/A').trim(),
                     date: (row[3] || 'N/A').trim(),
                     scholarshipType: (row[4] || 'N/A').trim(),
                     status: 'Paid' // All students in the sheet are considered paid
@@ -113,11 +113,11 @@ async function loadStudentsFromSheets() {
 // Load sample data (fallback)
 function loadSampleData() {
     students = [
-        { firstName: 'Juan', lastName: 'Dela Cruz', fullName: 'Juan Dela Cruz', receiptNo: 'RCP-001', date: '2025-01-01', scholarshipType: 'Academic Scholar', status: 'Paid' },
-        { firstName: 'Maria', lastName: 'Santos', fullName: 'Maria Santos', receiptNo: 'RCP-002', date: '2025-01-02', scholarshipType: 'Sports Scholar', status: 'Paid' },
-        { firstName: 'Pedro', lastName: 'Garcia', fullName: 'Pedro Garcia', receiptNo: 'RCP-003', date: '2025-01-03', scholarshipType: 'Academic Scholar', status: 'Paid' },
-        { firstName: 'Ana', lastName: 'Reyes', fullName: 'Ana Reyes', receiptNo: 'RCP-004', date: '2025-01-04', scholarshipType: 'Arts Scholar', status: 'Paid' },
-        { firstName: 'Carlos', lastName: 'Mendoza', fullName: 'Carlos Mendoza', receiptNo: 'RCP-005', date: '2025-01-05', scholarshipType: 'Academic Scholar', status: 'Paid' },
+        { firstName: 'Juan', lastName: 'Dela Cruz', fullName: 'Juan Dela Cruz', orNumber: 'OR-001', date: '2025-01-01', scholarshipType: 'Academic Scholar', status: 'Paid' },
+        { firstName: 'Maria', lastName: 'Santos', fullName: 'Maria Santos', orNumber: 'OR-002', date: '2025-01-02', scholarshipType: 'Sports Scholar', status: 'Paid' },
+        { firstName: 'Pedro', lastName: 'Garcia', fullName: 'Pedro Garcia', orNumber: 'OR-003', date: '2025-01-03', scholarshipType: 'Academic Scholar', status: 'Paid' },
+        { firstName: 'Ana', lastName: 'Reyes', fullName: 'Ana Reyes', orNumber: 'OR-004', date: '2025-01-04', scholarshipType: 'Arts Scholar', status: 'Paid' },
+        { firstName: 'Carlos', lastName: 'Mendoza', fullName: 'Carlos Mendoza', orNumber: 'OR-005', date: '2025-01-05', scholarshipType: 'Academic Scholar', status: 'Paid' },
     ];
     console.log('⚠️ Using sample data (5 students)');
 }
@@ -224,16 +224,16 @@ function performSearch() {
     const query = searchInput.value.toLowerCase().trim();
     
     if (!query) {
-        alert('Please enter your first name, last name, or receipt number');
+        alert('Please enter your first name, last name, or OR number');
         return;
     }
 
-    // Search by first name, last name, full name, or receipt number
+    // Search by first name, last name, full name, or OR number
     const student = students.find(s => 
         s.firstName.toLowerCase().includes(query) || 
         s.lastName.toLowerCase().includes(query) ||
         s.fullName.toLowerCase().includes(query) ||
-        s.receiptNo.toLowerCase().includes(query)
+        s.orNumber.toLowerCase().includes(query)
     );
 
     if (student) {
@@ -261,7 +261,7 @@ function displayStudentInfo(student) {
                         <span class="text-3xl mr-3">✓</span>
                         Payment Verified
                     </span>
-                    <span class="text-green-700 font-mono text-sm bg-white px-3 py-1 rounded-lg shadow">${student.receiptNo}</span>
+                    <span class="text-green-700 font-mono text-sm bg-white px-3 py-1 rounded-lg shadow">${student.orNumber}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -307,8 +307,8 @@ function displayNoResults() {
     studentInfo.innerHTML = `
         <div class="bg-red-50 border-3 border-red-200 rounded-lg p-6 text-center fade-in shadow-lg">
             <div class="text-red-600 text-5xl mb-3">✗</div>
-            <p class="text-red-700 font-semibold text-lg">No record found with that name or receipt number.</p>
-            <p class="text-red-600 text-sm mt-2">Please check the spelling or try searching with your receipt number.</p>
+            <p class="text-red-700 font-semibold text-lg">No record found with that name or OR number.</p>
+            <p class="text-red-600 text-sm mt-2">Please check the spelling or try searching with your OR number.</p>
         </div>
     `;
     searchResults.classList.remove('hidden');
@@ -318,11 +318,42 @@ function displayNoResults() {
 // ADMIN PANEL - TABLE RENDERING
 // ============================================
 
-function renderStudentsTable() {
-    studentsTable.innerHTML = students.map((student, index) => {
+let filteredStudents = [];
+
+function renderStudentsTable(searchQuery = '') {
+    // Filter students based on search query
+    const studentsToDisplay = searchQuery 
+        ? students.filter(s => 
+            s.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.orNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.scholarshipType.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : students;
+    
+    filteredStudents = studentsToDisplay;
+
+    if (studentsToDisplay.length === 0) {
+        studentsTable.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                    <div class="text-4xl mb-2">🔍</div>
+                    <p class="font-semibold">No students found</p>
+                    <p class="text-sm">Try adjusting your search</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    studentsTable.innerHTML = studentsToDisplay.map((student, displayIndex) => {
+        // Get the actual index in the original students array
+        const actualIndex = students.indexOf(student);
+        
         return `
             <tr class="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all">
-                <td class="px-6 py-4 text-sm font-mono text-gray-900">${student.receiptNo}</td>
+                <td class="px-6 py-4 text-sm font-mono text-gray-900">${student.orNumber}</td>
                 <td class="px-6 py-4 text-sm font-semibold text-gray-900">${student.firstName}</td>
                 <td class="px-6 py-4 text-sm font-semibold text-gray-900">${student.lastName}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${student.date}</td>
@@ -333,16 +364,21 @@ function renderStudentsTable() {
                     </span>
                 </td>
                 <td class="px-6 py-4 text-sm space-x-3">
-                    <button onclick="editStudent(${index})" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline transform hover:scale-110 transition-all">
+                    <button onclick="editStudent(${actualIndex})" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline transform hover:scale-110 transition-all">
                         ✏️ Edit
                     </button>
-                    <button onclick="deleteStudent(${index})" class="text-red-600 hover:text-red-800 font-semibold hover:underline transform hover:scale-110 transition-all">
+                    <button onclick="deleteStudent(${actualIndex})" class="text-red-600 hover:text-red-800 font-semibold hover:underline transform hover:scale-110 transition-all">
                         🗑️ Delete
                     </button>
                 </td>
             </tr>
         `;
     }).join('');
+}
+
+function performAdminSearch() {
+    const searchQuery = document.getElementById('adminSearchInput').value;
+    renderStudentsTable(searchQuery);
 }
 
 // ============================================
@@ -353,11 +389,15 @@ function saveStudent(e) {
     e.preventDefault();
     
     const editId = document.getElementById('editId').value;
+    
+    // Try both orNumber and receiptNo for backwards compatibility
+    const orNumberElement = document.getElementById('orNumber') || document.getElementById('receiptNo');
+    
     const student = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         fullName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
-        receiptNo: document.getElementById('receiptNo').value,
+        orNumber: orNumberElement ? orNumberElement.value : 'N/A',
         date: document.getElementById('date').value,
         scholarshipType: document.getElementById('scholarshipType').value,
         status: 'Paid' // Always set to Paid
@@ -381,7 +421,13 @@ function editStudent(index) {
     document.getElementById('editId').value = index;
     document.getElementById('firstName').value = student.firstName;
     document.getElementById('lastName').value = student.lastName;
-    document.getElementById('receiptNo').value = student.receiptNo;
+    
+    // Try both orNumber and receiptNo for backwards compatibility
+    const orNumberElement = document.getElementById('orNumber') || document.getElementById('receiptNo');
+    if (orNumberElement) {
+        orNumberElement.value = student.orNumber;
+    }
+    
     document.getElementById('date').value = student.date;
     document.getElementById('scholarshipType').value = student.scholarshipType;
     

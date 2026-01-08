@@ -201,7 +201,29 @@
                         </div>
                     </form>
                 </div>
-
+                    <!-- Admin Search Bar -->
+<div class="bg-gradient-to-br from-blue-50 to-yellow-50 rounded-2xl p-6 mb-8 border-3 border-blue-300 shadow-lg">
+    <div class="flex items-center space-x-4">
+        <div class="flex-1 relative">
+            <input 
+                type="text" 
+                id="adminSearchInput" 
+                placeholder="Search by name, OR number, or scholarship type..." 
+                class="w-full px-6 py-3 text-lg border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-400 focus:border-blue-500 transition-all shadow"
+                oninput="performAdminSearch()"
+            >
+            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <button onclick="document.getElementById('adminSearchInput').value=''; renderStudentsTable();" class="px-6 py-3 bg-gray-500 text-white rounded-xl font-bold hover:bg-gray-600 transition-all">
+            Clear
+        </button>
+    </div>
+   
+</div>
                 <!-- Students Table -->
                 <div class="bg-white rounded-2xl border-3 border-yellow-300 overflow-hidden shadow-xl">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
@@ -256,13 +278,7 @@
                     
                     <!-- Contact Info - Compact -->
                     <div class="space-y-2">
-                        <a href="mailto:info@achievers.org" class="flex items-center space-x-2 text-blue-200 hover:text-yellow-400 transition-colors text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>info@achievers.org</span>
-                        </a>
-                        
+                    
                         <a href="https://www.facebook.com/profile.php?id=61577007655393" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 text-blue-200 hover:text-yellow-400 transition-colors text-sm">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
