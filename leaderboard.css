@@ -1,0 +1,255 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 40px 0;
+    margin: 0;
+}
+
+.main-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.header-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.header-card h1 {
+    color: #667eea;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 2.5rem;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.stats-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.rankings-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    min-height: 400px;
+}
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    padding: 25px;
+    margin-bottom: 15px;
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border-left: 6px solid #667eea;
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.rank-item:hover {
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.rank-item.rank-1 {
+    background: linear-gradient(135deg, #ffd700 0%, #fff9e6 100%);
+    border-left-color: #ffd700;
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+}
+
+.rank-item.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0 0%, #f5f5f5 100%);
+    border-left-color: #c0c0c0;
+    box-shadow: 0 5px 20px rgba(192, 192, 192, 0.3);
+}
+
+.rank-item.rank-3 {
+    background: linear-gradient(135deg, #cd7f32 0%, #fff5e6 100%);
+    border-left-color: #cd7f32;
+    box-shadow: 0 5px 20px rgba(205, 127, 50, 0.3);
+}
+
+.rank-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #667eea;
+    min-width: 80px;
+    text-align: center;
+}
+
+.rank-1 .rank-number { 
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.rank-2 .rank-number { 
+    color: #c0c0c0;
+    text-shadow: 2px 2px 4px rgba(192, 192, 192, 0.3);
+}
+
+.rank-3 .rank-number { 
+    color: #cd7f32;
+    text-shadow: 2px 2px 4px rgba(205, 127, 50, 0.3);
+}
+
+.trophy-icon {
+    font-size: 28px;
+    margin-right: 8px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.rank-1 .trophy-icon,
+.rank-2 .trophy-icon,
+.rank-3 .trophy-icon {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.team-info {
+    flex-grow: 1;
+    margin-left: 25px;
+}
+
+.team-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.team-details {
+    color: #666;
+    font-size: 15px;
+    font-style: italic;
+}
+
+.score-badge {
+    font-size: 32px;
+    font-weight: bold;
+    color: #667eea;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-width: 100px;
+    text-align: center;
+}
+
+.rank-1 .score-badge {
+    color: #ffd700;
+    background: linear-gradient(135deg, #fff9e6, #ffffff);
+}
+
+.rank-2 .score-badge {
+    color: #c0c0c0;
+    background: linear-gradient(135deg, #f5f5f5, #ffffff);
+}
+
+.rank-3 .score-badge {
+    color: #cd7f32;
+    background: linear-gradient(135deg, #fff5e6, #ffffff);
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #667eea;
+}
+
+.spinner-border {
+    width: 4rem;
+    height: 4rem;
+    border-width: 0.3rem;
+}
+
+.error-message {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    color: #856404;
+    text-align: center;
+}
+
+.error-message p {
+    margin: 10px 0 0 0;
+}
+
+.last-updated {
+    text-align: center;
+    color: #999;
+    margin-top: 30px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .header-card h1 {
+        font-size: 2rem;
+    }
+
+    .rank-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .team-info {
+        margin-left: 0;
+        margin: 15px 0;
+    }
+
+    .rank-number {
+        font-size: 32px;
+    }
+
+    .score-badge {
+        font-size: 28px;
+        padding: 12px 25px;
+    }
+
+    .team-name {
+        font-size: 20px;
+    }
+}
