@@ -12,6 +12,85 @@ body {
     font-family: 'Inter', 'Segoe UI', sans-serif;
     background: #E5E5E5;
     color: #3a3a3a;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ======================================
+   BACKGROUND BUBBLES
+====================================== */
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 90% 30%, rgba(0, 0, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 0, 0, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 35%),
+        radial-gradient(circle at 30% 60%, rgba(0, 0, 0, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 15% 45%, rgba(0, 0, 0, 0.04) 0%, transparent 35%);
+    background-size: 
+        800px 800px,
+        600px 600px,
+        700px 700px,
+        500px 500px,
+        900px 900px,
+        650px 650px,
+        550px 550px,
+        750px 750px;
+    background-position: 
+        0% 0%,
+        100% 0%,
+        0% 100%,
+        100% 100%,
+        50% 50%,
+        30% 60%,
+        70% 20%,
+        15% 45%;
+    animation: float-bubbles 30s ease-in-out infinite;
+}
+
+@keyframes float-bubbles {
+    0%, 100% {
+        background-position: 
+            0% 0%,
+            100% 0%,
+            0% 100%,
+            100% 100%,
+            50% 50%,
+            30% 60%,
+            70% 20%,
+            15% 45%;
+    }
+    50% {
+        background-position: 
+            10% 10%,
+            90% 15%,
+            5% 90%,
+            95% 85%,
+            55% 45%,
+            35% 55%,
+            65% 25%,
+            20% 50%;
+    }
+}
+
+/* Ensure all content is above bubbles */
+.navbar,
+.hero-section,
+.admin-section,
+.footer {
+    position: relative;
+    z-index: 1;
 }
 
 /* ======================================
