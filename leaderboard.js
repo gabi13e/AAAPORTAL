@@ -83,35 +83,36 @@ async function loadLeaderboard() {
     }
 }
 
-// Function to parse CSV data
 function parseCSV(csvText) {
     const lines = csvText.split('\n');
     const contestants = [];
-    
-    // Skip header row (index 0) and process data rows
+
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
-        
-        // Parse CSV line
+
         const columns = parseCSVLine(line);
-        
-        // Expected format: Contestant Name | Score | Scholarship Program
-        if (columns.length >= 2) {
-            const contestantName = columns[0];
-            const score = parseFloat(columns[1]) || 0;
-            const scholarshipProgram = columns[2] || '';
-            
+        if (columns.length < 2) continue;
+
+        const contestantName = columns[1]?.trim();
+        const scholarshipProgram = columns[2]?.trim() || '';
+
+        // OVERALL TOTAL is last column
+        const scoreIndex = columns.length - 1;
+        const score = Number(columns[scoreIndex]) || 0;
+
+        if (contestantName) {
             contestants.push({
-                contestantName: contestantName,
-                score: score,
-                scholarshipProgram: scholarshipProgram
+                contestantName,
+                scholarshipProgram,
+                score
             });
         }
     }
-    
+
     return contestants;
 }
+
 
 // Parse a single CSV line (handles quotes)
 function parseCSVLine(line) {
@@ -138,10 +139,21 @@ function parseCSVLine(line) {
 
 // Function to sort contestants by score and assign ranks
 function sortAndRankTeams(contestants) {
-    // Sort by score (descending)
+    const hasAnyScore = contestants.some(c => c.score > 0);
+
+    if (!hasAnyScore) {
+        // Alphabetical order when no one has scored yet
+        contestants.sort((a, b) =>
+            a.contestantName.localeCompare(b.contestantName)
+        );
+
+        contestants.forEach(c => c.rank = '-');
+        return contestants;
+    }
+
+    // Normal ranking by score
     contestants.sort((a, b) => b.score - a.score);
-    
-    // Assign ranks
+
     let currentRank = 1;
     for (let i = 0; i < contestants.length; i++) {
         if (i > 0 && contestants[i].score < contestants[i - 1].score) {
@@ -149,37 +161,56 @@ function sortAndRankTeams(contestants) {
         }
         contestants[i].rank = currentRank;
     }
-    
+
     return contestants;
 }
+
 
 // Function to display leaderboard
 function displayLeaderboard(contestants) {
     const container = document.getElementById('rankingsContainer');
     container.innerHTML = '';
     
+    // Create vertical container
+    const verticalContainer = document.createElement('div');
+    verticalContainer.className = 'rankings-container';
+    
     contestants.forEach((contestant, index) => {
         const rankClass = `rank-${contestant.rank}`;
-        const trophyIcon = contestant.rank === 1 ? '🥇' : contestant.rank === 2 ? '🥈' : contestant.rank === 3 ? '🥉' : '';
-        
+        // Only show trophy icons for ranks 1, 2, and 3
+       const trophyIcon =
+    contestant.score > 0
+        ? contestant.rank === 1 ? '🥇'
+        : contestant.rank === 2 ? '🥈'
+        : contestant.rank === 3 ? '🥉'
+        : ''
+        : '';
+
         const rankItem = document.createElement('div');
         rankItem.className = `rank-item ${rankClass}`;
-        rankItem.style.animationDelay = `${index * 0.1}s`;
+        rankItem.style.animationDelay = `${index * 0.05}s`;
         
         rankItem.innerHTML = `
             <div class="rank-number">
-                ${trophyIcon ? `<span class="trophy-icon">${trophyIcon}</span>` : ''}
-                #${contestant.rank}
+                ${trophyIcon ? `<div class="trophy-icon">${trophyIcon}</div>` : ''}
+                <div>#${contestant.rank}</div>
             </div>
             <div class="team-info">
                 <div class="team-name">${contestant.contestantName}</div>
                 ${contestant.scholarshipProgram ? `<div class="team-details">${contestant.scholarshipProgram}</div>` : ''}
             </div>
-            <div class="score-badge">${contestant.score}</div>
+          <div class="score-badge">
+    <div class="score-value">${contestant.score > 0 ? contestant.score : '—'}</div>
+    <div class="score-label">PTS</div>
+</div>
+
+
         `;
         
-        container.appendChild(rankItem);
+        verticalContainer.appendChild(rankItem);
     });
+    
+    container.appendChild(verticalContainer);
 }
 
 // Function to show error message
@@ -207,3 +238,10 @@ window.addEventListener('beforeunload', () => {
         clearInterval(autoRefreshInterval);
     }
 });
+
+const scoreBadge = rankItem.querySelector('.score-badge');
+
+setTimeout(() => {
+    scoreBadge.classList.add('score-update');
+    setTimeout(() => scoreBadge.classList.remove('score-update'), 350);
+}, 50);

@@ -17,6 +17,22 @@ let students = [];
 let isLoading = false;
 
 // ============================================
+// DOM ELEMENTS (Will be initialized after DOM loads)
+// ============================================
+
+let heroSection;
+let adminSection;
+let adminBtn;
+let backToHome;
+let searchInput;
+let searchBtn;
+let searchResults;
+let studentInfo;
+let studentForm;
+let studentsTable;
+let cancelEdit;
+
+// ============================================
 // AUTHENTICATION FUNCTIONS
 // ============================================
 
@@ -43,13 +59,8 @@ function logout() {
 
 function showLogoutMessage() {
     const message = document.createElement('div');
-    message.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
-    message.innerHTML = `
-        <div class="flex items-center space-x-3">
-            <span>✓</span>
-            <span>Logged out successfully</span>
-        </div>
-    `;
+    message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
+    message.innerHTML = '<div style="display: flex; align-items: center; gap: 12px;"><span>✓</span><span>Logged out successfully</span></div>';
     document.body.appendChild(message);
     setTimeout(() => message.remove(), 3000);
 }
@@ -58,7 +69,6 @@ function showLogoutMessage() {
 // GOOGLE SHEETS API FUNCTIONS
 // ============================================
 
-// Load students from Google Sheets
 async function loadStudentsFromSheets() {
     isLoading = true;
     showLoadingMessage('Loading student data...');
@@ -75,9 +85,8 @@ async function loadStudentsFromSheets() {
         const data = await response.json();
         
         if (data.values && data.values.length > 1) {
-            // Skip header row (index 0) and convert to objects
             students = data.values.slice(1)
-                .filter(row => row[0] || row[1]) // Only include rows with a first or last name
+                .filter(row => row[0] || row[1])
                 .map(row => ({
                     firstName: (row[0] || '').trim(),
                     lastName: (row[1] || '').trim(),
@@ -85,14 +94,13 @@ async function loadStudentsFromSheets() {
                     orNumber: (row[2] || 'N/A').trim(),
                     date: (row[3] || 'N/A').trim(),
                     scholarshipType: (row[4] || 'N/A').trim(),
-                    status: 'Paid' // All students in the sheet are considered paid
+                    status: 'Paid'
                 }));
             
             console.log('✅ Successfully loaded', students.length, 'students from Google Sheets');
             hideLoadingMessage();
             
-            // Render table if in admin view
-            if (!adminSection.classList.contains('hidden')) {
+            if (adminSection && !adminSection.classList.contains('hidden')) {
                 renderStudentsTable();
             }
             
@@ -103,14 +111,13 @@ async function loadStudentsFromSheets() {
     } catch (error) {
         console.error('❌ Error loading from Google Sheets:', error);
         loadSampleData();
-        showErrorMessage('Could not connect to Google Sheets. Using sample data. Please check your configuration.');
+        showErrorMessage('Could not connect to Google Sheets. Using sample data.');
         return false;
     } finally {
         isLoading = false;
     }
 }
 
-// Load sample data (fallback)
 function loadSampleData() {
     students = [
         { firstName: 'Juan', lastName: 'Dela Cruz', fullName: 'Juan Dela Cruz', orNumber: 'OR-001', date: '2025-01-01', scholarshipType: 'Academic Scholar', status: 'Paid' },
@@ -123,27 +130,10 @@ function loadSampleData() {
 }
 
 // ============================================
-// DOM ELEMENTS
-// ============================================
-
-const heroSection = document.getElementById('heroSection');
-const adminSection = document.getElementById('adminSection');
-const adminBtn = document.getElementById('adminBtn');
-const backToHome = document.getElementById('backToHome');
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const searchResults = document.getElementById('searchResults');
-const studentInfo = document.getElementById('studentInfo');
-const studentForm = document.getElementById('studentForm');
-const studentsTable = document.getElementById('studentsTable');
-const cancelEdit = document.getElementById('cancelEdit');
-
-// ============================================
 // NAVIGATION FUNCTIONS
 // ============================================
 
 function showAdminPanel() {
-    // Check authentication
     if (!checkAuthentication()) {
         window.location.href = 'login.html';
         return;
@@ -158,18 +148,21 @@ function showAdminPanel() {
 function showStudentView() {
     adminSection.classList.add('hidden');
     heroSection.style.display = 'block';
-    searchResults.classList.add('hidden');
+    if (searchResults) {
+        searchResults.classList.add('hidden');
+        searchResults.style.display = 'none';
+    }
     clearForm();
 }
 
 function addLogoutButton() {
-    // Check if logout button already exists
     if (document.getElementById('logoutBtn')) return;
 
     const backToHomeBtn = document.getElementById('backToHome');
     const logoutBtn = document.createElement('button');
     logoutBtn.id = 'logoutBtn';
-    logoutBtn.className = 'px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all';
+    logoutBtn.className = 'nav-btn';
+    logoutBtn.style.cssText = 'background: #dc2626; margin-left: 12px;';
     logoutBtn.innerHTML = '🚪 Logout';
     logoutBtn.addEventListener('click', logout);
     
@@ -183,16 +176,8 @@ function addLogoutButton() {
 function showLoadingMessage(message) {
     const loadingDiv = document.createElement('div');
     loadingDiv.id = 'loadingMessage';
-    loadingDiv.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
-    loadingDiv.innerHTML = `
-        <div class="flex items-center space-x-3">
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>${message}</span>
-        </div>
-    `;
+    loadingDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
+    loadingDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span>⏳</span><span>${message}</span></div>`;
     document.body.appendChild(loadingDiv);
 }
 
@@ -205,30 +190,32 @@ function hideLoadingMessage() {
 
 function showErrorMessage(message) {
     const errorDiv = document.createElement('div');
-    errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
-    errorDiv.innerHTML = `
-        <div class="flex items-center space-x-3">
-            <span>⚠️</span>
-            <span>${message}</span>
-        </div>
-    `;
+    errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
+    errorDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span>⚠️</span><span>${message}</span></div>`;
     document.body.appendChild(errorDiv);
     setTimeout(() => errorDiv.remove(), 5000);
 }
 
 // ============================================
-// SEARCH FUNCTIONALITY (UPDATED FOR MULTIPLE MATCHES)
+// SEARCH FUNCTIONALITY
 // ============================================
 
 function performSearch() {
+    console.log('🔍 performSearch called');
+    
+    if (!searchInput) {
+        console.error('❌ searchInput element not found!');
+        return;
+    }
+    
     const query = searchInput.value.toLowerCase().trim();
+    console.log('Search query:', query);
     
     if (!query) {
         alert('Please enter your first name, last name, or OR number');
         return;
     }
 
-    // Find ALL matching students
     const matchingStudents = students.filter(s => 
         s.firstName.toLowerCase().includes(query) || 
         s.lastName.toLowerCase().includes(query) ||
@@ -236,152 +223,125 @@ function performSearch() {
         s.orNumber.toLowerCase().includes(query)
     );
 
+    console.log('Found matches:', matchingStudents.length);
+
     if (matchingStudents.length === 1) {
-        // Only one match - display directly
         displayStudentInfo(matchingStudents[0]);
     } else if (matchingStudents.length > 1) {
-        // Multiple matches - let user choose
         displayMultipleMatches(matchingStudents);
     } else {
-        // No matches found
         displayNoResults();
     }
 }
 
 function displayMultipleMatches(matches) {
     studentInfo.innerHTML = `
-        <div class="fade-in space-y-4">
-            <div class="bg-yellow-50 border-3 border-yellow-300 rounded-lg p-6 shadow-lg">
-                <div class="flex items-center mb-4">
-                    <span class="text-4xl mr-3">🔍</span>
+        <div style="animation: fadeIn 0.4s ease;">
+            <div style="background: #fef3c7; border: 3px solid #fbbf24; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                    <span style="font-size: 2rem; margin-right: 12px;">🔍</span>
                     <div>
-                        <h3 class="text-xl font-bold text-yellow-800">
-                            Multiple Records Found
-                        </h3>
-                        <p class="text-yellow-700 text-sm">Found ${matches.length} students matching your search</p>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #92400e;">Multiple Records Found</h3>
+                        <p style="color: #b45309; font-size: 0.875rem;">Found ${matches.length} students matching your search</p>
                     </div>
                 </div>
-                <p class="text-yellow-700 mb-4 font-medium">Please select your record below:</p>
-                <div class="space-y-3">
+                <p style="color: #b45309; margin-bottom: 16px; font-weight: 600;">Please select your record below:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${matches.map((student) => {
                         const studentIndex = students.indexOf(student);
                         return `
                             <button onclick="selectStudent(${studentIndex})" 
-                                    class="w-full text-left bg-white hover:bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 transition-all hover:shadow-md hover:border-yellow-400 transform hover:scale-[1.02]">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="font-bold text-gray-900 text-lg">${student.fullName}</div>
-                                    <span class="text-xs font-mono bg-yellow-100 px-2 py-1 rounded border border-yellow-300">${student.orNumber}</span>
+                                    style="width: 100%; text-align: left; background: white; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                    <div style="font-weight: 700; color: #111827; font-size: 1.125rem;">${student.fullName}</div>
+                                    <span style="font-size: 0.75rem; font-family: monospace; background: #fef3c7; padding: 4px 8px; border-radius: 4px; border: 1px solid #fbbf24;">${student.orNumber}</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                                    <div>
-                                        <span class="font-medium">Date:</span> ${student.date}
-                                    </div>
-                                    <div>
-                                        <span class="font-medium">Scholarship:</span> ${student.scholarshipType}
-                                    </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.875rem; color: #4b5563;">
+                                    <div><span style="font-weight: 600;">Date:</span> ${student.date}</div>
+                                    <div><span style="font-weight: 600;">Scholarship:</span> ${student.scholarshipType}</div>
                                 </div>
                             </button>
                         `;
                     }).join('')}
                 </div>
-                <div class="mt-4 p-3 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                    <p class="text-sm text-blue-700">
-                        💡 <strong>Tip:</strong> Search using your OR Number for exact matches
-                    </p>
-                </div>
             </div>
         </div>
     `;
     searchResults.classList.remove('hidden');
+    searchResults.style.display = 'block';
 }
 
-// Add this function to window so it can be called from onclick
 window.selectStudent = function(index) {
     displayStudentInfo(students[index]);
 };
 
 function displayStudentInfo(student) {
-    // Since all students in the list are paid, always show "Paid" status
-    const config = { 
-        color: 'green', 
-        icon: '✓', 
-        bg: 'bg-green-50', 
-        border: 'border-green-300', 
-        text: 'text-green-800' 
-    };
-
     studentInfo.innerHTML = `
-        <div class="fade-in">
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-3 border-green-300 space-y-4 shadow-lg">
-                <div class="flex justify-between items-center pb-3 border-b-2 border-green-200">
-                    <span class="font-bold text-gray-700 text-lg flex items-center">
-                        <span class="text-3xl mr-3">✓</span>
+        <div style="animation: fadeIn 0.4s ease;">
+            <div style="background: linear-gradient(to bottom right, #d1fae5, #a7f3d0); border-radius: 16px; padding: 24px; border: 3px solid #10b981; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid #6ee7b7; margin-bottom: 16px;">
+                    <span style="font-weight: 700; color: #374151; font-size: 1.125rem; display: flex; align-items: center;">
+                        <span style="font-size: 2rem; margin-right: 12px;">✓</span>
                         Payment Verified
                     </span>
-                    <span class="text-green-700 font-mono text-sm bg-white px-3 py-1 rounded-lg shadow">${student.orNumber}</span>
+                    <span style="color: #065f46; font-family: monospace; font-size: 0.875rem; background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${student.orNumber}</span>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div>
-                        <span class="text-sm text-gray-600 font-medium">First Name</span>
-                        <div class="text-gray-900 font-semibold text-lg">${student.firstName}</div>
+                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">First Name</span>
+                        <div style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.firstName}</div>
                     </div>
                     <div>
-                        <span class="text-sm text-gray-600 font-medium">Last Name</span>
-                        <div class="text-gray-900 font-semibold text-lg">${student.lastName}</div>
+                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Last Name</span>
+                        <div style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.lastName}</div>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg p-4 border-2 border-green-200 shadow">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-600 font-medium">Scholarship Type</span>
-                        <span class="text-gray-900 font-semibold">${student.scholarshipType}</span>
+                <div style="background: white; border-radius: 12px; padding: 16px; border: 2px solid #6ee7b7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Scholarship Type</span>
+                        <span style="color: #111827; font-weight: 700;">${student.scholarshipType}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600 font-medium">Payment Date</span>
-                        <span class="text-gray-900 font-bold text-lg">${student.date}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Payment Date</span>
+                        <span style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.date}</span>
                     </div>
                 </div>
-                <div class="${config.bg} rounded-lg p-4 border-3 ${config.border} shadow-lg">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-gray-700 text-lg">Payment Status</span>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-3xl">${config.icon}</span>
-                            <span class="px-6 py-3 rounded-full font-bold ${config.text} bg-white border-2 ${config.border} text-lg">
-                                PAID
-                            </span>
+                <div style="background: #d1fae5; border-radius: 12px; padding: 16px; border: 3px solid #10b981; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; color: #374151; font-size: 1.125rem;">Payment Status</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 2rem;">✓</span>
+                            <span style="padding: 12px 24px; border-radius: 9999px; font-weight: 700; color: #065f46; background: white; border: 2px solid #10b981; font-size: 1.125rem;">PAID</span>
                         </div>
                     </div>
-                    <p class="text-sm text-green-700 mt-3 text-center font-medium">
+                    <p style="font-size: 0.875rem; color: #065f46; margin-top: 12px; text-align: center; font-weight: 600;">
                         🎉 Your contribution has been successfully received. Thank you!
                     </p>
                 </div>
-                <button onclick="performSearch()" class="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-all border-2 border-gray-300">
-                    ← Back to Search Results
-                </button>
             </div>
         </div>
     `;
     searchResults.classList.remove('hidden');
+    searchResults.style.display = 'block';
 }
 
 function displayNoResults() {
     studentInfo.innerHTML = `
-        <div class="bg-red-50 border-3 border-red-200 rounded-lg p-6 text-center fade-in shadow-lg">
-            <div class="text-red-600 text-5xl mb-3">✗</div>
-            <p class="text-red-700 font-semibold text-lg">No record found with that name or OR number.</p>
-            <p class="text-red-600 text-sm mt-2">Please check the spelling or try searching with your OR number.</p>
+        <div style="background: #fee2e2; border: 3px solid #fca5a5; border-radius: 12px; padding: 24px; text-align: center; animation: fadeIn 0.4s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="color: #dc2626; font-size: 3rem; margin-bottom: 12px;">✗</div>
+            <p style="color: #b91c1c; font-weight: 700; font-size: 1.125rem;">No record found with that name or OR number.</p>
+            <p style="color: #dc2626; font-size: 0.875rem; margin-top: 8px;">Please check the spelling or try searching with your OR number.</p>
         </div>
     `;
     searchResults.classList.remove('hidden');
+    searchResults.style.display = 'block';
 }
 
 // ============================================
-// ADMIN PANEL - TABLE RENDERING
+// ADMIN PANEL FUNCTIONS
 // ============================================
 
-let filteredStudents = [];
-
 function renderStudentsTable(searchQuery = '') {
-    // Filter students based on search query
     const studentsToDisplay = searchQuery 
         ? students.filter(s => 
             s.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -391,43 +351,40 @@ function renderStudentsTable(searchQuery = '') {
             s.scholarshipType.toLowerCase().includes(searchQuery.toLowerCase())
           )
         : students;
-    
-    filteredStudents = studentsToDisplay;
 
     if (studentsToDisplay.length === 0) {
         studentsTable.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                    <div class="text-4xl mb-2">🔍</div>
-                    <p class="font-semibold">No students found</p>
-                    <p class="text-sm">Try adjusting your search</p>
+                <td colspan="7" style="padding: 32px; text-align: center; color: #6b7280;">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+                    <p style="font-weight: 700;">No students found</p>
+                    <p style="font-size: 0.875rem;">Try adjusting your search</p>
                 </td>
             </tr>
         `;
         return;
     }
 
-    studentsTable.innerHTML = studentsToDisplay.map((student, displayIndex) => {
-        // Get the actual index in the original students array
+    studentsTable.innerHTML = studentsToDisplay.map((student) => {
         const actualIndex = students.indexOf(student);
         
         return `
-            <tr class="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all">
-                <td class="px-6 py-4 text-sm font-mono text-gray-900">${student.orNumber}</td>
-                <td class="px-6 py-4 text-sm font-semibold text-gray-900">${student.firstName}</td>
-                <td class="px-6 py-4 text-sm font-semibold text-gray-900">${student.lastName}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${student.date}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${student.scholarshipType}</td>
-                <td class="px-6 py-4 text-sm">
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border-2 border-green-300">
+            <tr>
+                <td style="padding: 16px 24px;">${student.orNumber}</td>
+                <td style="padding: 16px 24px;">${student.firstName}</td>
+                <td style="padding: 16px 24px;">${student.lastName}</td>
+                <td style="padding: 16px 24px;">${student.date}</td>
+                <td style="padding: 16px 24px;">${student.scholarshipType}</td>
+                <td style="padding: 16px 24px;">
+                    <span style="padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background: #d1fae5; color: #065f46; border: 2px solid #10b981;">
                         ✓ PAID
                     </span>
                 </td>
-                <td class="px-6 py-4 text-sm space-x-3">
-                    <button onclick="editStudent(${actualIndex})" class="text-blue-600 hover:text-blue-800 font-semibold hover:underline transform hover:scale-110 transition-all">
+                <td style="padding: 16px 24px;">
+                    <button onclick="editStudent(${actualIndex})" style="color: #2563eb; font-weight: 700; margin-right: 12px; cursor: pointer; background: none; border: none;">
                         ✏️ Edit
                     </button>
-                    <button onclick="deleteStudent(${actualIndex})" class="text-red-600 hover:text-red-800 font-semibold hover:underline transform hover:scale-110 transition-all">
+                    <button onclick="deleteStudent(${actualIndex})" style="color: #dc2626; font-weight: 700; cursor: pointer; background: none; border: none;">
                         🗑️ Delete
                     </button>
                 </td>
@@ -436,39 +393,28 @@ function renderStudentsTable(searchQuery = '') {
     }).join('');
 }
 
-function performAdminSearch() {
-    const searchQuery = document.getElementById('adminSearchInput').value;
-    renderStudentsTable(searchQuery);
-}
-
-// ============================================
-// ADMIN PANEL - CRUD OPERATIONS
-// ============================================
-
 function saveStudent(e) {
     e.preventDefault();
     
     const editId = document.getElementById('editId').value;
-    
-    // Try both orNumber and receiptNo for backwards compatibility
-    const orNumberElement = document.getElementById('orNumber') || document.getElementById('receiptNo');
+    const receiptNo = document.getElementById('receiptNo');
     
     const student = {
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
         fullName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
-        orNumber: orNumberElement ? orNumberElement.value : 'N/A',
+        orNumber: receiptNo ? receiptNo.value : 'N/A',
         date: document.getElementById('date').value,
         scholarshipType: document.getElementById('scholarshipType').value,
-        status: 'Paid' // Always set to Paid
+        status: 'Paid'
     };
 
     if (editId !== '') {
         students[parseInt(editId)] = student;
-        alert('✅ Student record updated!\n\n⚠️ Note: Changes are only saved in memory.\nTo persist data, you need to manually update Google Sheets or implement OAuth2 write access.');
+        alert('✅ Student record updated!');
     } else {
         students.push(student);
-        alert('✅ Student record added!\n\n⚠️ Note: Changes are only saved in memory.\nTo persist data, you need to manually update Google Sheets or implement OAuth2 write access.');
+        alert('✅ Student record added!');
     }
 
     clearForm();
@@ -482,10 +428,9 @@ function editStudent(index) {
     document.getElementById('firstName').value = student.firstName;
     document.getElementById('lastName').value = student.lastName;
     
-    // Try both orNumber and receiptNo for backwards compatibility
-    const orNumberElement = document.getElementById('orNumber') || document.getElementById('receiptNo');
-    if (orNumberElement) {
-        orNumberElement.value = student.orNumber;
+    const receiptNo = document.getElementById('receiptNo');
+    if (receiptNo) {
+        receiptNo.value = student.orNumber;
     }
     
     document.getElementById('date').value = student.date;
@@ -498,52 +443,92 @@ function editStudent(index) {
 function deleteStudent(index) {
     const student = students[index];
     
-    if (confirm(`⚠️ Are you sure you want to delete ${student.fullName}'s record?\n\nNote: This only removes from memory, not from Google Sheets.`)) {
+    if (confirm(`⚠️ Are you sure you want to delete ${student.fullName}'s record?`)) {
         students.splice(index, 1);
         renderStudentsTable();
-        alert('✅ Student record deleted from memory!');
+        alert('✅ Student record deleted!');
     }
 }
 
 function clearForm() {
-    studentForm.reset();
-    document.getElementById('editId').value = '';
-    cancelEdit.classList.add('hidden');
+    if (studentForm) {
+        studentForm.reset();
+        document.getElementById('editId').value = '';
+        cancelEdit.classList.add('hidden');
+    }
 }
 
-// ============================================
-// EVENT LISTENERS
-// ============================================
-
-adminBtn.addEventListener('click', () => {
-    // Redirect to login page instead of showing admin directly
-    window.location.href = 'login.html';
-});
-
-backToHome.addEventListener('click', showStudentView);
-
-searchBtn.addEventListener('click', performSearch);
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        performSearch();
-    }
-});
-
-studentForm.addEventListener('submit', saveStudent);
-cancelEdit.addEventListener('click', clearForm);
+// Make functions available globally
+window.editStudent = editStudent;
+window.deleteStudent = deleteStudent;
+window.performSearch = performSearch;
 
 // ============================================
 // INITIALIZATION
 // ============================================
 
-window.editStudent = editStudent;
-window.deleteStudent = deleteStudent;
-
-// Load data on page load
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Student Clearance System Starting...');
     
-    // Check if admin parameter is in URL
+    // Initialize DOM elements
+    heroSection = document.getElementById('heroSection');
+    adminSection = document.getElementById('adminSection');
+    adminBtn = document.getElementById('adminBtn');
+    backToHome = document.getElementById('backToHome');
+    searchInput = document.getElementById('searchInput');
+    searchBtn = document.getElementById('searchBtn');
+    searchResults = document.getElementById('searchResults');
+    studentInfo = document.getElementById('studentInfo');
+    studentForm = document.getElementById('studentForm');
+    studentsTable = document.getElementById('studentsTable');
+    cancelEdit = document.getElementById('cancelEdit');
+    
+    // Log element status
+    console.log('Elements found:', {
+        searchInput: !!searchInput,
+        searchBtn: !!searchBtn,
+        searchResults: !!searchResults,
+        studentInfo: !!studentInfo
+    });
+    
+    // Attach event listeners
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+    }
+    
+    if (backToHome) {
+        backToHome.addEventListener('click', showStudentView);
+    }
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Search button clicked!');
+            performSearch();
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log('Enter pressed in search input');
+                performSearch();
+            }
+        });
+    }
+    
+    if (studentForm) {
+        studentForm.addEventListener('submit', saveStudent);
+    }
+    
+    if (cancelEdit) {
+        cancelEdit.addEventListener('click', clearForm);
+    }
+    
+    // Check for admin parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true') {
         if (checkAuthentication()) {
@@ -553,14 +538,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
+    // Load data
     console.log('📊 Attempting to connect to Google Sheets...');
-    
     const success = await loadStudentsFromSheets();
     
     if (success) {
         console.log('✅ Google Sheets connection successful!');
     } else {
-        console.log('⚠️ Using sample data. Check console for errors.');
+        console.log('⚠️ Using sample data.');
     }
     
     console.log('📝 Total students loaded:', students.length);

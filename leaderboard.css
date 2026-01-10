@@ -1,255 +1,308 @@
+/* ======================================
+   GLOBAL
+====================================== */
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background: linear-gradient(135deg, #4664eb 0%, #2677e2 100%);
     min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 40px 0;
     margin: 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: #E5E5E5;
+    padding: 24px;
+    color: #3a3a3a;
 }
 
 .main-container {
-    max-width: 1000px;
+    width: 100%;
+    max-width: 820px;
     margin: 0 auto;
-    padding: 0 15px;
 }
 
-.header-card {
-    background: white;
+/* ======================================
+   BACK BUTTON
+====================================== */
+
+.back-button-container {
+    max-width: 820px;
+    margin: 0 auto 20px;
+}
+
+.back-btn {
+    padding: 12px 24px;
     border-radius: 20px;
-    padding: 40px;
-    margin-bottom: 30px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    background: #E5E5E5;
+    box-shadow:
+        -8px -8px 16px rgba(255, 255, 255, 0.7),
+        8px 8px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #3a3a3a;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        -4px -4px 12px rgba(255, 255, 255, 0.8),
+        4px 4px 12px rgba(0, 0, 0, 0.25);
+    color: #3a3a3a;
+}
+
+.back-btn:active {
+    transform: translateY(0);
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, 0.7),
+        inset 4px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+
+/* ======================================
+   NEUMORPHIC BASE
+====================================== */
+
+.neu {
+    background: #E5E5E5;
+    border-radius: 24px;
+    box-shadow:
+        -20px -20px 40px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* ======================================
+   HEADER
+====================================== */
+
+.header-card {
+    padding: 28px;
     text-align: center;
+    margin-bottom: 22px;
+    border-radius: 26px;
+    background: #E5E5E5;
+    box-shadow:
+        -20px -20px 40px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
 }
 
 .header-card h1 {
-    color: #667eea;
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 2.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
 }
 
 .subtitle {
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    color: #6b6b6b;
 }
 
 .stats-badge {
+    margin-top: 14px;
     display: inline-block;
-    background: linear-gradient(135deg, #667eea, #2677e2);
-    color: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 1.1rem;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: #E5E5E5;
+    box-shadow:
+        inset -6px -6px 12px rgba(255, 255, 255, 0.8),
+        inset 6px 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* ======================================
+   LEADERBOARD CARD
+====================================== */
+
 .rankings-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    min-height: 400px;
+    padding: 24px;
+    border-radius: 26px;
+    background: #E5E5E5;
+    box-shadow:
+        -20px -20px 40px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
 }
+
+/* ======================================
+   STATES
+====================================== */
+
+.loading,
+.error-message {
+    text-align: center;
+    padding: 36px 0;
+    color: #6b6b6b;
+}
+
+/* ======================================
+   RANK ITEM
+====================================== */
 
 .rank-item {
     display: flex;
     align-items: center;
-    padding: 25px;
-    margin-bottom: 15px;
-    background: linear-gradient(to right, #f8f9fa, #ffffff);
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    border-left: 6px solid #667eea;
-    animation: slideIn 0.5s ease forwards;
-    opacity: 0;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    justify-content: space-between;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+    background: #E5E5E5;
+    box-shadow:
+        -12px -12px 24px rgba(255, 255, 255, 0.65),
+        12px 12px 24px rgba(0, 0, 0, 0.18);
+    transition: all 0.25s ease;
+    animation: fadeUp 0.4s ease forwards;
 }
 
 .rank-item:hover {
-    transform: translateX(8px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    box-shadow:
+        -6px -6px 16px rgba(255, 255, 255, 0.8),
+        6px 6px 16px rgba(0, 0, 0, 0.22);
 }
 
-.rank-item.rank-1 {
-    background: linear-gradient(135deg, #ffd700 0%, #fff9e6 100%);
-    border-left-color: #ffd700;
-    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
-}
-
-.rank-item.rank-2 {
-    background: linear-gradient(135deg, #c0c0c0 0%, #f5f5f5 100%);
-    border-left-color: #c0c0c0;
-    box-shadow: 0 5px 20px rgba(192, 192, 192, 0.3);
-}
-
-.rank-item.rank-3 {
-    background: linear-gradient(135deg, #cd7f32 0%, #fff5e6 100%);
-    border-left-color: #cd7f32;
-    box-shadow: 0 5px 20px rgba(205, 127, 50, 0.3);
-}
+/* ======================================
+   RANK NUMBER
+====================================== */
 
 .rank-number {
-    font-size: 36px;
-    font-weight: bold;
-    color: #667eea;
-    min-width: 80px;
-    text-align: center;
-}
-
-.rank-1 .rank-number { 
-    color: #ffd700;
-    text-shadow: 2px 2px 4px rgba(255, 215, 0, 0.3);
-}
-
-.rank-2 .rank-number { 
-    color: #c0c0c0;
-    text-shadow: 2px 2px 4px rgba(192, 192, 192, 0.3);
-}
-
-.rank-3 .rank-number { 
-    color: #cd7f32;
-    text-shadow: 2px 2px 4px rgba(205, 127, 50, 0.3);
+    min-width: 70px;
+    font-weight: 800;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .trophy-icon {
-    font-size: 28px;
-    margin-right: 8px;
-    animation: bounce 2s infinite;
+    font-size: 1.4rem;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-.rank-1 .trophy-icon,
-.rank-2 .trophy-icon,
-.rank-3 .trophy-icon {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-}
+/* ======================================
+   TEAM INFO
+====================================== */
 
 .team-info {
-    flex-grow: 1;
-    margin-left: 25px;
+    flex: 1;
+    padding: 0 16px;
 }
 
 .team-name {
-    font-size: 22px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
 }
 
 .team-details {
-    color: #666;
-    font-size: 15px;
-    font-style: italic;
+    font-size: 0.85rem;
+    color: #777;
 }
+
+/* ======================================
+   SCORE BADGE (INNER SHADOW)
+====================================== */
 
 .score-badge {
-    font-size: 32px;
-    font-weight: bold;
-    color: #667eea;
-    background: white;
-    padding: 15px 30px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    min-width: 100px;
-    text-align: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #E5E5E5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow:
+        inset -8px -8px 16px rgba(255, 255, 255, 0.75),
+        inset 8px 8px 16px rgba(0, 0, 0, 0.25);
+
+    transition: all 0.25s ease;
 }
 
-.rank-1 .score-badge {
-    color: #ffd700;
-    background: linear-gradient(135deg, #fff9e6, #ffffff);
+.score-value {
+    font-size: 1.2rem;
+    font-weight: 800;
 }
 
-.rank-2 .score-badge {
-    color: #c0c0c0;
-    background: linear-gradient(135deg, #f5f5f5, #ffffff);
+.score-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #777;
 }
 
-.rank-3 .score-badge {
-    color: #cd7f32;
-    background: linear-gradient(135deg, #fff5e6, #ffffff);
-}
-
-.loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #667eea;
-}
-
-.spinner-border {
-    width: 4rem;
-    height: 4rem;
-    border-width: 0.3rem;
-}
-
-.error-message {
-    background: #fff3cd;
-    border: 2px solid #ffc107;
-    border-radius: 15px;
-    padding: 25px;
-    margin: 20px 0;
-    color: #856404;
-    text-align: center;
-}
-
-.error-message p {
-    margin: 10px 0 0 0;
-}
+/* ======================================
+   LAST UPDATED
+====================================== */
 
 .last-updated {
     text-align: center;
-    color: #999;
-    margin-top: 30px;
-    font-size: 14px;
-    font-style: italic;
+    font-size: 0.8rem;
+    margin-top: 14px;
+    color: #777;
 }
 
-@media (max-width: 768px) {
-    .header-card h1 {
-        font-size: 2rem;
-    }
+/* ======================================
+   ANIMATIONS
+====================================== */
 
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.score-update {
+    animation: pressIn 0.35s ease;
+}
+
+@keyframes pressIn {
+    0% {
+        box-shadow:
+            inset -4px -4px 8px rgba(255, 255, 255, 0.6),
+            inset 4px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow:
+            inset -10px -10px 20px rgba(255, 255, 255, 0.9),
+            inset 10px 10px 20px rgba(0, 0, 0, 0.35);
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+@media (max-width: 576px) {
     .rank-item {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px;
-    }
-
-    .team-info {
-        margin-left: 0;
-        margin: 15px 0;
-    }
-
-    .rank-number {
-        font-size: 32px;
+        padding: 14px 16px;
     }
 
     .score-badge {
-        font-size: 28px;
-        padding: 12px 25px;
+        width: 50px;
+        height: 50px;
     }
 
-    .team-name {
-        font-size: 20px;
+    .back-btn {
+        font-size: 0.85rem;
+        padding: 10px 20px;
     }
 }

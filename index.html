@@ -4,413 +4,295 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Association Of All Achievers</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-yellow-50 to-white">
-    <!-- Floating Shapes Background -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="floating-shape shape-1"></div>
-        <div class="floating-shape shape-2"></div>
-        <div class="floating-shape shape-3"></div>
-        <div class="floating-shape shape-4"></div>
-    </div>
-
-     <div class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-yellow-200 shadow-sm">
-    <div class="container mx-auto px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <div class="w-14 h-14 flex items-center justify-center transform hover:scale-110 transition-transform">
-                    <img src="img/AAA.png" alt="AAA Logo" class="w-14 h-14 object-contain">
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="nav-logo">
+                    <img src="img/AAA.png" alt="AAA Logo">
                 </div>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                    Association of all Achievers
-                </h1>
+                <div>
+                    <div class="nav-title">Association of all Achievers</div>
+                </div>
             </div>
-
-            <div class="flex items-center space-x-4">
-                <!-- Quiz Bowl Rankings -->
-                <a href="leaderboard.html"
-                   class="group relative px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                    <span class="relative z-10">🏆 Quiz Bowl Rankings</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="nav-buttons">
+                <a href="leaderboard.html" class="nav-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                    </svg>
+                    Quiz Bowl Rankings
                 </a>
-
-                <!-- Admin Login -->
-                <button id="adminBtn"
-                    class="group relative px-6 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-900 rounded-full font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                    <span class="relative z-10">🔐 Admin Login</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <button id="adminBtn" class="nav-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    Admin Login
                 </button>
             </div>
         </div>
-    </div>
-</div>
-
-
-            </div>
-        </div>
-    </div>
+    </nav>
 
     <!-- Hero Section -->
-    <section id="heroSection" class="relative min-h-screen flex items-center justify-center py-20 px-6">
-        <div class="container mx-auto relative z-10">
-            <!-- Logo Circle with Animation -->
-            <div class="mb-12 flex justify-center">
-                <div class="relative">
-                    <div class="w-40 h-40 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-2xl animate-float">
-                        <img src="img/AAA.png" alt="AAA Logo" class="w-32 h-32 object-contain">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+    <section id="heroSection" class="hero-section">
+        <!-- Logo -->
+        <div class="logo-container">
+            <div class="logo-circle">
+                <img src="img/AAA.png" alt="AAA Logo">
+            </div>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="welcome-text">
+            <h1>Welcome, Scholars!</h1>
+            <p class="subtitle">Your Payment Portal for Scholars Contributions</p>
+            <p class="description">Quick. Simple. Secure. Check your contribution payment status instantly.</p>
+        </div>
+
+        <!-- Search Card -->
+        <div class="search-card">
+            <div class="search-header">
+                <div class="search-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h2>Check Payment Status</h2>
+                <p>Enter your Name or Receipt Number</p>
+            </div>
+
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="Type your Name or Receipt Number...">
+                <div class="input-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
                 </div>
             </div>
 
-            <!-- Welcome Text -->
-            <div class="text-center mb-16 space-y-4">
-                <h1 class="text-6xl md:text-7xl font-black bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent animate-slide-up">
-                    Welcome, Scholars!
-                </h1>
-                <p class="text-2xl md:text-3xl text-gray-700 font-semibold animate-slide-up" style="animation-delay: 0.1s;">
-                    Your Payment Portal for Scholars Contributions
-                </p>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto animate-slide-up" style="animation-delay: 0.2s;">
-                    Quick. Simple. Secure. Check your contribution payment status instantly.
-                </p>
+            <button id="searchBtn" class="search-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <span>Search Payment</span>
+            </button>
+
+            <!-- Search Results -->
+            <div id="searchResults" class="search-results">
+                <div id="studentInfo"></div>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3>Instant Results</h3>
+                <p>Get your payment status in seconds</p>
             </div>
 
-            <!-- Search Card -->
-            <div class="max-w-3xl mx-auto mb-16 animate-slide-up" style="animation-delay: 0.3s;">
-                <div class="bg-white rounded-3xl shadow-2xl p-8 border-4 border-yellow-300 relative overflow-hidden">
-                    <!-- Decorative Corner Elements -->
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-200 to-transparent rounded-bl-full opacity-50"></div>
-                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-200 to-transparent rounded-tr-full opacity-50"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="text-center mb-6">
-                            <div class="inline-block p-4 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl mb-4 shadow-lg">
-                                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <h2 class="text-3xl font-bold text-blue-700 mb-2">Check Payment Status</h2>
-                            <p class="text-gray-600">Enter your Name or Receipt Number</p>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="relative">
-                                <input type="text" id="searchInput" placeholder="Type your Name or Receipt Number..." 
-                                       class="w-full px-6 py-4 text-lg border-3 border-yellow-300 rounded-2xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all shadow-lg bg-yellow-50/30">
-                                <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-yellow-500">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <button id="searchBtn" class="group relative w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden">
-                                <span class="relative z-10 flex items-center justify-center space-x-2">
-                                    <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                    <span>Search Payment</span>
-                                </span>
-                                <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                            </button>
-                        </div>
-
-                        <!-- Search Results -->
-                        <div id="searchResults" class="hidden mt-8 animate-fade-in">
-                            <div class="border-t-4 border-yellow-300 pt-6">
-                                <div id="studentInfo"></div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
                 </div>
+                <h3>Secure Access</h3>
+                <p>Your data is protected and safe</p>
             </div>
 
-            <!-- Quick Info Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                <div class="group bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-200 hover:border-blue-400 transform hover:scale-105 hover:-translate-y-2 transition-all">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-blue-700 mb-2">Instant Results</h3>
-                        <p class="text-gray-600 text-sm">Get your payment status in seconds</p>
-                    </div>
+            <div class="info-card">
+                <div class="info-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
-
-                <div class="group bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200 hover:border-yellow-400 transform hover:scale-105 hover:-translate-y-2 transition-all" style="transition-delay: 0.1s;">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-yellow-600 mb-2">Secure Access</h3>
-                        <p class="text-gray-600 text-sm">Your data is protected and safe</p>
-                    </div>
-                </div>
-
-                <div class="group bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200 hover:border-green-400 transform hover:scale-105 hover:-translate-y-2 transition-all" style="transition-delay: 0.2s;">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-green-600 mb-2">24/7 Available</h3>
-                        <p class="text-gray-600 text-sm">Check anytime, anywhere</p>
-                    </div>
-                </div>
+                <h3>24/7 Available</h3>
+                <p>Check anytime, anywhere</p>
             </div>
         </div>
     </section>
 
     <!-- Admin Panel -->
-    <div id="adminSection" class="hidden min-h-screen bg-gradient-to-br from-blue-50 via-yellow-50 to-white py-8">
-        <div class="container mx-auto px-6">
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border-4 border-yellow-300">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Admin Panel</h2>
-                        <p class="text-gray-600 mt-2">Manage student contribution payments</p>
-                    </div>
-                    <button id="backToHome" class="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                        ← Back to Portal
-                    </button>
+    <div id="adminSection" class="admin-section">
+        <div class="admin-card">
+            <div class="admin-header">
+                <div>
+                    <h2>Admin Panel</h2>
+                    <p>Manage student contribution payments</p>
                 </div>
-
-                <!-- Add/Edit Student Form -->
-                <div class="bg-gradient-to-br from-yellow-50 to-blue-50 rounded-2xl p-8 mb-8 border-3 border-yellow-300 shadow-lg">
-                    <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center">
-                        <span class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white w-10 h-10 rounded-full flex items-center justify-center mr-3 shadow-lg">+</span>
-                        Add/Edit Student Record
-                    </h3>
-                    <form id="studentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="hidden" id="editId">
-                        <div>
-                            <label class="block text-sm font-bold text-blue-700 mb-2">First Name *</label>
-                            <input type="text" id="firstName" required class="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-blue-700 mb-2">Last Name *</label>
-                            <input type="text" id="lastName" required class="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-blue-700 mb-2">Receipt Number *</label>
-                            <input type="text" id="receiptNo" required placeholder="e.g., RCP-001" class="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-blue-700 mb-2">Date *</label>
-                            <input type="date" id="date" required class="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-bold text-blue-700 mb-2">Scholarship Type *</label>
-                            <input type="text" id="scholarshipType" required placeholder="e.g., Academic Scholar, Sports Scholar" class="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl focus:ring-4 focus:ring-yellow-400 focus:border-yellow-500 transition-all">
-                        </div>
-                        <div class="md:col-span-2 flex gap-4">
-                            <button type="submit" class="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-900 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                                💾 Save Student
-                            </button>
-                            <button type="button" id="cancelEdit" class="px-10 py-4 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all hidden">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                    <!-- Admin Search Bar -->
-<div class="bg-gradient-to-br from-blue-50 to-yellow-50 rounded-2xl p-6 mb-8 border-3 border-blue-300 shadow-lg">
-    <div class="flex items-center space-x-4">
-        <div class="flex-1 relative">
-            <input 
-                type="text" 
-                id="adminSearchInput" 
-                placeholder="Search by name, OR number, or scholarship type..." 
-                class="w-full px-6 py-3 text-lg border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-400 focus:border-blue-500 transition-all shadow"
-                oninput="performAdminSearch()"
-            >
-            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-500">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <button id="backToHome" class="nav-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Portal
+                </button>
             </div>
-        </div>
-        <button onclick="document.getElementById('adminSearchInput').value=''; renderStudentsTable();" class="px-6 py-3 bg-gray-500 text-white rounded-xl font-bold hover:bg-gray-600 transition-all">
-            Clear
-        </button>
-    </div>
-   
-</div>
-                <!-- Students Table -->
-                <div class="bg-white rounded-2xl border-3 border-yellow-300 overflow-hidden shadow-xl">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-                        <h3 class="text-2xl font-bold text-white">All Student Records</h3>
+
+            <!-- Add/Edit Student Form -->
+            <div class="form-card">
+                <h3>
+                    <span class="form-badge">+</span>
+                    Add/Edit Student Record
+                </h3>
+                <form id="studentForm">
+                    <input type="hidden" id="editId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>First Name *</label>
+                            <input type="text" id="firstName" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name *</label>
+                            <input type="text" id="lastName" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Receipt Number *</label>
+                            <input type="text" id="receiptNo" required placeholder="e.g., RCP-001" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" id="date" required class="form-input">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Scholarship Type *</label>
+                            <input type="text" id="scholarshipType" required placeholder="e.g., Academic Scholar, Sports Scholar" class="form-input">
+                        </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-yellow-100 border-b-3 border-yellow-300">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Receipt No</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">First Name</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Last Name</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Date</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Scholarship Type</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Status</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-blue-700">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentsTable" class="divide-y divide-yellow-200">
-                            </tbody>
-                        </table>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                            </svg>
+                            Save Student
+                        </button>
+                        <button type="button" id="cancelEdit" class="btn-primary hidden">Cancel</button>
                     </div>
+                </form>
+            </div>
+
+            <!-- Admin Search Bar -->
+            <div class="admin-search">
+                <div class="admin-search-wrapper">
+                    <input type="text" id="adminSearchInput" placeholder="Search by name, OR number, or scholarship type..." class="form-input">
+                    <button onclick="document.getElementById('adminSearchInput').value=''; renderStudentsTable();" class="btn-primary">Clear</button>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>All Student Records</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Receipt No</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Date</th>
+                                <th>Scholarship Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTable">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-
-<!-- Legal Footer -->
-     <footer class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-16 mt-20">
-        <div class="container mx-auto px-6 max-w-6xl">
-            
-            <!-- Main Footer Content -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
                 <!-- Brand Section -->
-                <div class="lg:col-span-2">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <div class=" rounded-xl flex items-center justify-center shadow-lg">
-                            <img src="img/AAA.png" alt="AAA Logo" class="w-11 h-11 object-contain">
+                <div>
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <img src="img/AAA.png" alt="AAA Logo">
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold">Association of All Achievers</h3>
-                            <p class="text-blue-300 text-xs">Supporting Scholars Since 2020</p>
+                            <div class="footer-title">Association of All Achievers</div>
+                            <div class="footer-subtitle">Supporting Scholars Since 2019</div>
                         </div>
                     </div>
-                    <p class="text-blue-200 text-sm leading-relaxed mb-6">
+                    <p class="footer-text">
                         Empowering students through transparent and secure contribution management. Your trusted partner in academic excellence.
                     </p>
-                    
-                    <!-- Contact Info - Compact -->
-                    <div class="space-y-2">
-                    
-                        <a href="https://www.facebook.com/profile.php?id=61577007655393" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 text-blue-200 hover:text-yellow-400 transition-colors text-sm">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            <span>Follow us on Facebook</span>
-                        </a>
-                        
-                    </div>
+                    <a href="https://www.facebook.com/profile.php?id=61577007655393" target="_blank" class="footer-link">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        Follow us on Facebook
+                    </a>
                 </div>
 
                 <!-- Quick Links -->
                 <div>
-                    <h4 class="text-lg font-bold mb-4 text-yellow-400">Quick Links</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#privacy" class="text-blue-200 hover:text-yellow-400 transition-colors">Privacy Policy</a></li>
-                        <li><a href="#terms" class="text-blue-200 hover:text-yellow-400 transition-colors">Terms & Conditions</a></li>
-                        <li><a href="#security" class="text-blue-200 hover:text-yellow-400 transition-colors">Security</a></li>
-                        <li><a href="#contact" class="text-blue-200 hover:text-yellow-400 transition-colors">Contact Us</a></li>
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#privacy" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="#terms" class="footer-link">Terms & Conditions</a></li>
+                        <li><a href="#security" class="footer-link">Security</a></li>
+                        <li><a href="#contact" class="footer-link">Contact Us</a></li>
                     </ul>
                 </div>
 
                 <!-- Important Notice -->
                 <div>
-                    <h4 class="text-lg font-bold mb-4 text-yellow-400">Important</h4>
-                    <div class="bg-blue-800/50 rounded-lg p-4 border border-blue-700">
-                        <p class="text-blue-200 text-xs leading-relaxed">
+                    <h4>Important</h4>
+                    <div class="footer-notice">
+                        <p style="font-size: 0.8rem; line-height: 1.5; margin: 0;">
                             Your data is protected with industry-standard security. We never share your information without consent.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Legal Information -->
+                <div>
+                    <h4>Legal & Security</h4>
+                    <div class="footer-notice" style="margin-bottom: 12px;">
+                        <p style="font-size: 0.75rem; line-height: 1.5; margin: 0; font-weight: 600;">Privacy</p>
+                        <p style="font-size: 0.75rem; line-height: 1.4; margin: 4px 0 0 0; color: #777;">
+                            We collect student names and payment records solely for contribution management. Data is stored securely and never shared without consent.
+                        </p>
+                    </div>
+                    <div class="footer-notice" style="margin-bottom: 12px;">
+                        <p style="font-size: 0.75rem; line-height: 1.5; margin: 0; font-weight: 600;">Security</p>
+                        <p style="font-size: 0.75rem; line-height: 1.4; margin: 4px 0 0 0; color: #777;">
+                            Industry-standard security measures protect your information. Access is restricted to authorized personnel only.
+                        </p>
+                    </div>
+                    <div class="footer-notice">
+                        <p style="font-size: 0.75rem; line-height: 1.5; margin: 0; font-weight: 600;">Terms</p>
+                        <p style="font-size: 0.75rem; line-height: 1.4; margin: 4px 0 0 0; color: #777;">
+                            Use this portal only for legitimate purposes. Unauthorized access or data manipulation is prohibited.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Collapsible Legal Information -->
-            <div class="border-t border-blue-700 pt-8 mb-8">
-                <details class="group">
-                    <summary class="flex items-center justify-between cursor-pointer text-yellow-400 font-bold text-sm mb-4 hover:text-yellow-300 transition-colors">
-                        <span class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Legal Information & Policies
-                        </span>
-                        <svg class="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </summary>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <!-- Privacy -->
-                        <div class="bg-blue-800/30 rounded-lg p-4 border border-blue-700/50">
-                            <h5 class="font-bold text-yellow-400 text-sm mb-2 flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                Privacy
-                            </h5>
-                            <p class="text-blue-200 text-xs leading-relaxed">
-                                We collect student names and payment records solely for contribution management. Data is stored securely and never shared without consent.
-                            </p>
-                        </div>
-
-                        <!-- Security -->
-                        <div class="bg-blue-800/30 rounded-lg p-4 border border-blue-700/50">
-                            <h5 class="font-bold text-yellow-400 text-sm mb-2 flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                </svg>
-                                Security
-                            </h5>
-                            <p class="text-blue-200 text-xs leading-relaxed">
-                                Industry-standard security measures protect your information. Access is restricted to authorized personnel only.
-                            </p>
-                        </div>
-
-                        <!-- Terms -->
-                        <div class="bg-blue-800/30 rounded-lg p-4 border border-blue-700/50">
-                            <h5 class="font-bold text-yellow-400 text-sm mb-2 flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Terms
-                            </h5>
-                            <p class="text-blue-200 text-xs leading-relaxed">
-                                Use this portal only for legitimate purposes. Unauthorized access or data manipulation is prohibited and may result in legal action.
-                            </p>
-                        </div>
-                    </div>
-                </details>
-            </div>
-
             <!-- Bottom Bar -->
-            <div class="border-t border-blue-700 pt-6">
-                <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
-                    <p class="text-sm text-blue-200">
-                        © 2026 Association of All Achievers. All rights reserved.
-                    </p>
-                    
-                    <div class="flex items-center space-x-4 text-xs text-blue-300">
-                        <span>Version 1.0.0</span>
-                        <div class="w-px h-4 bg-blue-700"></div>
-                        <span>Powered by Miano</span>
-                    </div>
-                </div>
-                
-                <!-- Compact Disclaimer -->
-                <p class="text-xs text-blue-300 text-center mt-4 leading-relaxed">
-                    <strong class="text-yellow-400">Disclaimer:</strong> This portal is managed by the organization for easy viewing of payment status. While the information is accurate, this is not an official school website.
-
+            <div class="footer-bottom">
+                <p>© 2026 Association of All Achievers. All rights reserved.</p>
+                <p style="margin-top: 8px; font-size: 0.75rem;">Version 1.0.0 | Powered by Miano</p>
+                <p style="margin-top: 16px; font-size: 0.75rem; line-height: 1.6;">
+                    <strong>Disclaimer:</strong> This portal is managed by the organization for easy viewing of payment status. While the information is accurate, this is not an official school website.
                 </p>
             </div>
         </div>
     </footer>
+
     <script src="script.js"></script>
 </body>
-</html>
 </html>
