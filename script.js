@@ -445,16 +445,7 @@ function displayStudentInfo(student) {
                 </div>
             </div>
             
-            <!-- Action Buttons -->
-            <div style="display: flex; gap: 12px; margin-top: 24px; position: relative; z-index: 1;">
-                <button onclick="window.print()" style="flex: 1; padding: 12px; border: none; border-radius: 16px; background: #ECFDF5; color: #065F46; font-weight: 700; cursor: pointer; box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8), 6px 6px 12px rgba(16, 185, 129, 0.2); transition: all 0.3s ease;">
-                    🖨️ Print Receipt
-                </button>
-                <button onclick="performSearch()" style="flex: 1; padding: 12px; border: none; border-radius: 16px; background: #D1FAE5; color: #047857; font-weight: 700; cursor: pointer; box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8), 6px 6px 12px rgba(16, 185, 129, 0.2); transition: all 0.3s ease;">
-                    🔍 New Search
-                </button>
-            </div>
-        </div>
+           
     `;
     searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
