@@ -885,6 +885,34 @@ tr:last-child td {
         15px 15px 30px rgba(0, 0, 0, 0.2);
     animation: fadeIn 0.4s ease;
     border: 3px solid #FBBF24;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circles in background */
+.multiple-records-container::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 7s ease-in-out infinite;
+}
+
+.multiple-records-container::after {
+    content: '';
+    position: absolute;
+    bottom: -70px;
+    left: -70px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(146, 64, 14, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 9s ease-in-out infinite;
+    animation-delay: 1.5s;
 }
 
 .multiple-records-header {
@@ -892,6 +920,8 @@ tr:last-child td {
     align-items: center;
     margin-bottom: 24px;
     gap: 16px;
+    position: relative;
+    z-index: 1;
 }
 
 .multiple-records-icon {
@@ -927,6 +957,8 @@ tr:last-child td {
     color: #92400E;
     font-weight: 600;
     margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Student Card Button */
@@ -1022,6 +1054,43 @@ tr:last-child td {
         20px 20px 40px rgba(0, 0, 0, 0.25);
     animation: fadeIn 0.4s ease;
     border: 3px solid #10B981;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circles in background */
+.payment-verified-container::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.payment-verified-container::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(6, 95, 70, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-20px) scale(1.1);
+    }
 }
 
 .payment-verified-header {
@@ -1031,6 +1100,8 @@ tr:last-child td {
     padding-bottom: 20px;
     margin-bottom: 24px;
     border-bottom: 3px solid #6EE7B7;
+    position: relative;
+    z-index: 1;
 }
 
 .payment-verified-badge {
@@ -1079,6 +1150,8 @@ tr:last-child td {
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
 }
 
 .payment-name-item {
@@ -1109,6 +1182,8 @@ tr:last-child td {
         inset -8px -8px 16px rgba(255, 255, 255, 0.8),
         inset 8px 8px 16px rgba(16, 185, 129, 0.15);
     border: 2px solid #6EE7B7;
+    position: relative;
+    z-index: 1;
 }
 
 .payment-detail-row {
@@ -1143,6 +1218,8 @@ tr:last-child td {
         -12px -12px 24px rgba(255, 255, 255, 0.8),
         12px 12px 24px rgba(16, 185, 129, 0.25);
     border: 3px solid #10B981;
+    position: relative;
+    z-index: 1;
 }
 
 .payment-status-row {
@@ -1275,7 +1352,6 @@ tr:last-child td {
         align-items: flex-start;
     }
 }
-
 /* ======================================
    CUSTOM ALERT MODAL
 ====================================== */
