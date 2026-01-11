@@ -870,3 +870,601 @@ tr:last-child td {
         grid-template-columns: 1fr;
     }
 }
+
+/* ======================================
+   SEARCH RESULTS STYLING
+====================================== */
+
+/* Multiple Records Container */
+.multiple-records-container {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow:
+        -15px -15px 30px rgba(255, 255, 255, 0.7),
+        15px 15px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.4s ease;
+    border: 3px solid #FBBF24;
+}
+
+.multiple-records-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.multiple-records-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #FEF3C7;
+    box-shadow:
+        -8px -8px 16px rgba(255, 255, 255, 0.9),
+        8px 8px 16px rgba(251, 191, 36, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.multiple-records-icon svg {
+    stroke: #92400E;
+}
+
+.multiple-records-title h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #92400E;
+    margin-bottom: 4px;
+}
+
+.multiple-records-title p {
+    color: #B45309;
+    font-size: 0.9rem;
+}
+
+.multiple-records-subtitle {
+    color: #92400E;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Student Card Button */
+.student-card-btn {
+    width: 100%;
+    text-align: left;
+    background: #FFFBEB;
+    border: 2px solid #FBBF24;
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    box-shadow:
+        -8px -8px 16px rgba(255, 255, 255, 0.8),
+        8px 8px 16px rgba(251, 191, 36, 0.2);
+    transition: all 0.3s ease;
+}
+
+.student-card-btn:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        -6px -6px 14px rgba(255, 255, 255, 0.9),
+        6px 6px 14px rgba(251, 191, 36, 0.3);
+    background: #FEF3C7;
+    border-color: #F59E0B;
+}
+
+.student-card-btn:active {
+    transform: translateY(0);
+    box-shadow:
+        inset -6px -6px 12px rgba(255, 255, 255, 0.8),
+        inset 6px 6px 12px rgba(251, 191, 36, 0.25);
+}
+
+.student-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.student-card-name {
+    font-weight: 800;
+    color: #92400E;
+    font-size: 1.2rem;
+}
+
+.student-card-receipt {
+    font-size: 0.85rem;
+    font-family: monospace;
+    background: #FEF3C7;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow:
+        inset -3px -3px 6px rgba(255, 255, 255, 0.8),
+        inset 3px 3px 6px rgba(251, 191, 36, 0.2);
+    color: #92400E;
+    border: 1px solid #FBBF24;
+}
+
+.student-card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.student-card-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-card-detail-label {
+    font-weight: 600;
+    color: #B45309;
+    font-size: 0.85rem;
+}
+
+.student-card-detail-value {
+    font-weight: 700;
+    color: #92400E;
+}
+
+/* Payment Verified Card */
+.payment-verified-container {
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow:
+        -20px -20px 40px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.4s ease;
+    border: 3px solid #10B981;
+}
+
+.payment-verified-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 3px solid #6EE7B7;
+}
+
+.payment-verified-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    color: #065F46;
+    font-size: 1.3rem;
+}
+
+.payment-verified-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ECFDF5;
+    box-shadow:
+        -8px -8px 16px rgba(255, 255, 255, 0.9),
+        8px 8px 16px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-verified-icon svg {
+    stroke: #059669;
+}
+
+.payment-receipt-number {
+    font-family: monospace;
+    font-size: 0.95rem;
+    background: #ECFDF5;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    color: #065F46;
+    box-shadow:
+        inset -6px -6px 12px rgba(255, 255, 255, 0.8),
+        inset 6px 6px 12px rgba(16, 185, 129, 0.2);
+    border: 2px solid #10B981;
+}
+
+/* Name Section */
+.payment-name-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.payment-name-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payment-name-label {
+    font-size: 0.85rem;
+    color: #047857;
+    font-weight: 600;
+}
+
+.payment-name-value {
+    color: #065F46;
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
+/* Details Card */
+.payment-details-card {
+    background: #ECFDF5;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow:
+        inset -8px -8px 16px rgba(255, 255, 255, 0.8),
+        inset 8px 8px 16px rgba(16, 185, 129, 0.15);
+    border: 2px solid #6EE7B7;
+}
+
+.payment-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.payment-detail-row:not(:last-child) {
+    border-bottom: 2px solid #A7F3D0;
+}
+
+.payment-detail-label {
+    font-size: 0.9rem;
+    color: #047857;
+    font-weight: 600;
+}
+
+.payment-detail-value {
+    color: #065F46;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* Status Card */
+.payment-status-card {
+    background: #D1FAE5;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow:
+        -12px -12px 24px rgba(255, 255, 255, 0.8),
+        12px 12px 24px rgba(16, 185, 129, 0.25);
+    border: 3px solid #10B981;
+}
+
+.payment-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.payment-status-label {
+    font-weight: 800;
+    color: #065F46;
+    font-size: 1.2rem;
+}
+
+.payment-status-badge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.payment-status-checkmark {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ECFDF5;
+    box-shadow:
+        -6px -6px 12px rgba(255, 255, 255, 0.9),
+        6px 6px 12px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-status-checkmark svg {
+    stroke: #059669;
+}
+
+.payment-status-badge {
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-weight: 800;
+    color: #065F46;
+    background: #ECFDF5;
+    font-size: 1.1rem;
+    box-shadow:
+        inset -6px -6px 12px rgba(255, 255, 255, 0.8),
+        inset 6px 6px 12px rgba(16, 185, 129, 0.2);
+    border: 2px solid #10B981;
+}
+
+.payment-success-message {
+    text-align: center;
+    padding: 16px;
+    background: #ECFDF5;
+    border-radius: 16px;
+    box-shadow:
+        inset -4px -4px 8px rgba(255, 255, 255, 0.8),
+        inset 4px 4px 8px rgba(16, 185, 129, 0.15);
+}
+
+.payment-success-message p {
+    font-size: 0.9rem;
+    color: #065F46;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* No Results Card */
+.no-results-container {
+    background: #E5E5E5;
+    border-radius: 24px;
+    padding: 48px 32px;
+    text-align: center;
+    box-shadow:
+        -20px -20px 40px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.4s ease;
+}
+
+.no-results-icon {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: #E5E5E5;
+    box-shadow:
+        -15px -15px 30px rgba(255, 255, 255, 0.7),
+        15px 15px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-results-icon svg {
+    stroke: #3a3a3a;
+}
+
+.no-results-title {
+    color: #3a3a3a;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+}
+
+.no-results-description {
+    color: #777;
+    font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .payment-name-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .student-card-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .payment-verified-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .payment-status-row {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+}
+
+/* ======================================
+   CUSTOM ALERT MODAL
+====================================== */
+
+/* Modal Overlay */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+    padding: 20px;
+}
+
+/* Modal Container */
+.custom-modal {
+    background: #E5E5E5;
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow:
+        -10x -10px 15px rgba(255, 255, 255, 0.7),
+        20px 20px 40px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+/* Modal Icon */
+.custom-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 16px;
+    background: #E5E5E5;
+    box-shadow:
+        -4px -4px 12px rgba(255, 255, 255, 0.7),
+        10px 10px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-modal-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke: #3a3a3a;
+}
+
+/* Modal Content */
+.custom-modal-content {
+    text-align: center;
+}
+
+.custom-modal-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+}
+
+.custom-modal-message {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+/* Modal Button */
+.custom-modal-button {
+    width: 100%;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    background: #E5E5E5;
+    color: #3a3a3a;
+    box-shadow:
+        -10px -10px 20px rgba(255, 255, 255, 0.7),
+        10px 10px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.25s ease;
+}
+
+.custom-modal-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        -6px -6px 16px rgba(255, 255, 255, 0.8),
+        6px 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.custom-modal-button:active {
+    transform: translateY(0);
+    box-shadow:
+        inset -6px -6px 12px rgba(255, 255, 255, 0.7),
+        inset 6px 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Warning/Error Variant */
+.custom-modal.warning .custom-modal-icon {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    box-shadow:
+        -10px -10px 20px rgba(255, 255, 255, 0.8),
+        10px 10px 20px rgba(251, 191, 36, 0.3);
+}
+
+.custom-modal.warning .custom-modal-icon svg {
+    stroke: #92400E;
+}
+
+.custom-modal.warning .custom-modal-title {
+    color: #92400E;
+}
+
+.custom-modal.warning .custom-modal-message {
+    color: #B45309;
+}
+
+/* Success Variant */
+.custom-modal.success .custom-modal-icon {
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+    box-shadow:
+        -10px -10px 20px rgba(255, 255, 255, 0.8),
+        10px 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+.custom-modal.success .custom-modal-icon svg {
+    stroke: #059669;
+}
+
+.custom-modal.success .custom-modal-title {
+    color: #065F46;
+}
+
+.custom-modal.success .custom-modal-message {
+    color: #047857;
+}
+
+/* Error Variant */
+.custom-modal.error .custom-modal-icon {
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+    box-shadow:
+        -10px -10px 20px rgba(255, 255, 255, 0.8),
+        10px 10px 20px rgba(239, 68, 68, 0.3);
+}
+
+.custom-modal.error .custom-modal-icon svg {
+    stroke: #991B1B;
+}
+
+.custom-modal.error .custom-modal-title {
+    color: #991B1B;
+}
+
+.custom-modal.error .custom-modal-message {
+    color: #B91C1C;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .custom-modal {
+        padding: 24px;
+    }
+    
+    .custom-modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .custom-modal-message {
+        font-size: 0.9rem;
+    }
+}

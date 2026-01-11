@@ -212,7 +212,7 @@ function performSearch() {
     console.log('Search query:', query);
     
     if (!query) {
-        alert('Please enter your first name, last name, or OR number');
+        customAlert('Please enter your first name, last name, or OR number', 'warning');('Please enter your first name, last name, or OR number');
         return;
     }
 
@@ -233,90 +233,108 @@ function performSearch() {
         displayNoResults();
     }
 }
-
-function displayMultipleMatches(matches) {
-    studentInfo.innerHTML = `
-        <div style="animation: fadeIn 0.4s ease;">
-            <div style="background: #fef3c7; border: 3px solid #fbbf24; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                    <span style="font-size: 2rem; margin-right: 12px;">🔍</span>
-                    <div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #92400e;">Multiple Records Found</h3>
-                        <p style="color: #b45309; font-size: 0.875rem;">Found ${matches.length} students matching your search</p>
-                    </div>
-                </div>
-                <p style="color: #b45309; margin-bottom: 16px; font-weight: 600;">Please select your record below:</p>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    ${matches.map((student) => {
-                        const studentIndex = students.indexOf(student);
-                        return `
-                            <button onclick="selectStudent(${studentIndex})" 
-                                    style="width: 100%; text-align: left; background: white; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s;">
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                                    <div style="font-weight: 700; color: #111827; font-size: 1.125rem;">${student.fullName}</div>
-                                    <span style="font-size: 0.75rem; font-family: monospace; background: #fef3c7; padding: 4px 8px; border-radius: 4px; border: 1px solid #fbbf24;">${student.orNumber}</span>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.875rem; color: #4b5563;">
-                                    <div><span style="font-weight: 600;">Date:</span> ${student.date}</div>
-                                    <div><span style="font-weight: 600;">Scholarship:</span> ${student.scholarshipType}</div>
-                                </div>
-                            </button>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-    searchResults.classList.remove('hidden');
-    searchResults.style.display = 'block';
-}
-
+// Make selectStudent globally accessible
 window.selectStudent = function(index) {
     displayStudentInfo(students[index]);
 };
 
+// Updated displayMultipleMatches function
+function displayMultipleMatches(matches) {
+    studentInfo.innerHTML = `
+        <div class="multiple-records-container">
+            <div class="multiple-records-header">
+                <div class="multiple-records-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 32px; height: 32px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div class="multiple-records-title">
+                    <h3>Multiple Records Found</h3>
+                    <p>Found ${matches.length} students matching your search</p>
+                </div>
+            </div>
+            <p class="multiple-records-subtitle">Please select your record below:</p>
+            <div>
+                ${matches.map((student) => {
+                    const studentIndex = students.indexOf(student);
+                    return `
+                        <button onclick="window.selectStudent(${studentIndex})" class="student-card-btn">
+                            <div class="student-card-header">
+                                <div class="student-card-name">${student.fullName}</div>
+                                <div class="student-card-receipt">${student.orNumber}</div>
+                            </div>
+                            <div class="student-card-details">
+                                <div class="student-card-detail-item">
+                                    <span class="student-card-detail-label">Date</span>
+                                    <span class="student-card-detail-value">${student.date}</span>
+                                </div>
+                                <div class="student-card-detail-item">
+                                    <span class="student-card-detail-label">Scholarship</span>
+                                    <span class="student-card-detail-value">${student.scholarshipType}</span>
+                                </div>
+                            </div>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+    searchResults.classList.remove('hidden');
+    searchResults.style.display = 'block';
+}
+
+// Updated displayStudentInfo function
 function displayStudentInfo(student) {
     studentInfo.innerHTML = `
-        <div style="animation: fadeIn 0.4s ease;">
-            <div style="background: linear-gradient(to bottom right, #d1fae5, #a7f3d0); border-radius: 16px; padding: 24px; border: 3px solid #10b981; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid #6ee7b7; margin-bottom: 16px;">
-                    <span style="font-weight: 700; color: #374151; font-size: 1.125rem; display: flex; align-items: center;">
-                        <span style="font-size: 2rem; margin-right: 12px;">✓</span>
-                        Payment Verified
-                    </span>
-                    <span style="color: #065f46; font-family: monospace; font-size: 0.875rem; background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${student.orNumber}</span>
+        <div class="payment-verified-container">
+            <div class="payment-verified-header">
+                <div class="payment-verified-badge">
+                    <div class="payment-verified-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <span>Payment Verified</span>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div>
-                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">First Name</span>
-                        <div style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.firstName}</div>
-                    </div>
-                    <div>
-                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Last Name</span>
-                        <div style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.lastName}</div>
-                    </div>
+                <div class="payment-receipt-number">${student.orNumber}</div>
+            </div>
+            
+            <div class="payment-name-section">
+                <div class="payment-name-item">
+                    <span class="payment-name-label">First Name</span>
+                    <div class="payment-name-value">${student.firstName}</div>
                 </div>
-                <div style="background: white; border-radius: 12px; padding: 16px; border: 2px solid #6ee7b7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Scholarship Type</span>
-                        <span style="color: #111827; font-weight: 700;">${student.scholarshipType}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.875rem; color: #4b5563; font-weight: 600;">Payment Date</span>
-                        <span style="color: #111827; font-weight: 700; font-size: 1.125rem;">${student.date}</span>
-                    </div>
+                <div class="payment-name-item">
+                    <span class="payment-name-label">Last Name</span>
+                    <div class="payment-name-value">${student.lastName}</div>
                 </div>
-                <div style="background: #d1fae5; border-radius: 12px; padding: 16px; border: 3px solid #10b981; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: #374151; font-size: 1.125rem;">Payment Status</span>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 2rem;">✓</span>
-                            <span style="padding: 12px 24px; border-radius: 9999px; font-weight: 700; color: #065f46; background: white; border: 2px solid #10b981; font-size: 1.125rem;">PAID</span>
+            </div>
+            
+            <div class="payment-details-card">
+                <div class="payment-detail-row">
+                    <span class="payment-detail-label">Scholarship Type</span>
+                    <span class="payment-detail-value">${student.scholarshipType}</span>
+                </div>
+                <div class="payment-detail-row">
+                    <span class="payment-detail-label">Payment Date</span>
+                    <span class="payment-detail-value">${student.date}</span>
+                </div>
+            </div>
+            
+            <div class="payment-status-card">
+                <div class="payment-status-row">
+                    <span class="payment-status-label">Payment Status</span>
+                    <div class="payment-status-badge-wrapper">
+                        <div class="payment-status-checkmark">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
                         </div>
+                        <div class="payment-status-badge">PAID</div>
                     </div>
-                    <p style="font-size: 0.875rem; color: #065f46; margin-top: 12px; text-align: center; font-weight: 600;">
-                        🎉 Your contribution has been successfully received. Thank you!
-                    </p>
+                </div>
+                <div class="payment-success-message">
+                    <p>🎉 Your contribution has been successfully received. Thank you!</p>
                 </div>
             </div>
         </div>
@@ -325,18 +343,22 @@ function displayStudentInfo(student) {
     searchResults.style.display = 'block';
 }
 
+// Updated displayNoResults function
 function displayNoResults() {
     studentInfo.innerHTML = `
-        <div style="background: #fee2e2; border: 3px solid #fca5a5; border-radius: 12px; padding: 24px; text-align: center; animation: fadeIn 0.4s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <div style="color: #dc2626; font-size: 3rem; margin-bottom: 12px;">✗</div>
-            <p style="color: #b91c1c; font-weight: 700; font-size: 1.125rem;">No record found with that name or OR number.</p>
-            <p style="color: #dc2626; font-size: 0.875rem; margin-top: 8px;">Please check the spelling or try searching with your OR number.</p>
+        <div class="no-results-container">
+            <div class="no-results-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 48px; height: 48px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <p class="no-results-title">No record found with that name or OR number.</p>
+            <p class="no-results-description">Please check the spelling or try searching with your OR number.</p>
         </div>
     `;
     searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
 }
-
 // ============================================
 // ADMIN PANEL FUNCTIONS
 // ============================================
@@ -550,3 +572,96 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     console.log('📝 Total students loaded:', students.length);
 });
+
+// Custom Alert Function
+function customAlert(message, type = 'info') {
+    // Remove any existing modals
+    const existingModal = document.querySelector('.custom-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Determine icon based on type
+    let icon = '';
+    let title = '';
+    
+    switch(type) {
+        case 'warning':
+            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>`;
+            title = 'Attention Required';
+            break;
+        case 'success':
+            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>`;
+            title = 'Success';
+            break;
+        case 'error':
+            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>`;
+            title = 'Error';
+            break;
+        default:
+            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>`;
+            title = 'Information';
+    }
+    
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-modal-overlay';
+    
+    // Create modal
+    overlay.innerHTML = `
+        <div class="custom-modal ${type}">
+            <div class="custom-modal-icon">
+                ${icon}
+            </div>
+            <div class="custom-modal-content">
+                <h3 class="custom-modal-title">${title}</h3>
+                <p class="custom-modal-message">${message}</p>
+                <button class="custom-modal-button">OK</button>
+            </div>
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(overlay);
+    
+    // Close modal on button click
+    const button = overlay.querySelector('.custom-modal-button');
+    button.addEventListener('click', () => {
+        overlay.remove();
+    });
+    
+    // Close modal on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+    
+    // Close modal on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            overlay.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// Usage examples:
+// customAlert('Please enter your first name, last name, or OR number', 'warning');
+// customAlert('Student record added successfully!', 'success');
+// customAlert('Failed to connect to server', 'error');
+// customAlert('This is an informational message', 'info');
+
+// Replace all alert() calls in your code with customAlert()
+// Example in performSearch():
+// OLD: alert('Please enter your first name, last name, or OR number');
+// NEW: customAlert('Please enter your first name, last name, or OR number', 'warning');

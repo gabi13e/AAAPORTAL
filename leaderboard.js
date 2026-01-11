@@ -3,10 +3,10 @@
 // ======================================
 
 // Your Google Sheet ID (extract from URL: docs.google.com/spreadsheets/d/[SHEET_ID]/edit)
-const SHEET_ID = '1Xclywq7X_mVJ_JZ0fVwULYw_R_bO-Df-kXXrYrE1W5Y';
+const SHEET_ID = '1T5JvxVPCYId0Gz6NBY-C6oUTY_M_JjQk-aJD1Jt0ReM';
 
 // Your sheet/tab name (default is 'Sheet1')
-const SHEET_NAME = 'Sheet1';
+const SHEET_NAME = 'QuizBowl';
 
 // Auto-refresh interval in milliseconds (30000 = 30 seconds)
 const REFRESH_INTERVAL = 30000;
@@ -193,7 +193,7 @@ function displayLeaderboard(contestants) {
         rankItem.innerHTML = `
             <div class="rank-number">
                 ${trophyIcon ? `<div class="trophy-icon">${trophyIcon}</div>` : ''}
-                <div>#${contestant.rank}</div>
+                <div>${contestant.rank}</div>
             </div>
             <div class="team-info">
                 <div class="team-name">${contestant.contestantName}</div>

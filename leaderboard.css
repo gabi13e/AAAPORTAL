@@ -306,3 +306,382 @@ body {
         padding: 10px 20px;
     }
 }
+
+/* ======================================
+   RANK ITEM
+====================================== */
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+    background: #E5E5E5;
+    box-shadow:
+        -12px -12px 24px rgba(255, 255, 255, 0.65),
+        12px 12px 24px rgba(0, 0, 0, 0.18);
+    transition: all 0.25s ease;
+    animation: fadeUp 0.4s ease forwards;
+}
+
+.rank-item:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        -6px -6px 16px rgba(255, 255, 255, 0.8),
+        6px 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+/* Rank 1 - Gold Shadow */
+.rank-item.rank-1 {
+    box-shadow:
+         -6px -6px 16px rgba(255, 255, 255, 1),
+        6px 6px 16px rgba(184, 134, 11, 0.3);
+}
+
+.rank-item.rank-1:hover {
+    box-shadow:
+        -6px -6px 16px rgba(255, 223, 120, 0.6),
+        6px 6px 16px rgba(184, 134, 11, 0.4);
+}
+
+/* Rank 2 - Silver Shadow */
+.rank-item.rank-2 {
+    box-shadow:
+       -6px -6px 16px rgba(255, 255, 255, 1),
+        12px 12px 24px rgba(150, 150, 150, 0.35);
+}
+
+.rank-item.rank-2:hover {
+    box-shadow:
+        -6px -6px 16px rgba(220, 220, 220, 0.7),
+        6px 6px 16px rgba(150, 150, 150, 0.45);
+}
+
+/* Rank 3 - Bronze Shadow */
+.rank-item.rank-3 {
+    box-shadow:
+       -6px -6px 16px rgba(255, 255, 255, 1),
+        12px 12px 24px rgba(140, 90, 40, 0.35);
+}
+
+.rank-item.rank-3:hover {
+    box-shadow:
+        -6px -6px 16px rgba(205, 127, 50, 0.5),
+        6px 6px 16px rgba(140, 90, 40, 0.45);
+}
+
+/* ======================================
+   WOW FACTOR BACKGROUND
+====================================== */
+
+body {
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated Gradient Background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: linear-gradient(135deg, 
+        #E5E5E5 0%, 
+        #F0F0F0 25%, 
+        #E8E8E8 50%, 
+        #ECECEC 75%, 
+        #E5E5E5 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Floating Geometric Shapes */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    background-image: 
+        /* Large circles */
+        radial-gradient(circle at 15% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(192, 192, 192, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 20% 80%, rgba(205, 127, 50, 0.08) 0%, transparent 40%),
+        
+        /* Medium circles */
+        radial-gradient(circle at 70% 70%, rgba(255, 215, 0, 0.06) 0%, transparent 30%),
+        radial-gradient(circle at 50% 40%, rgba(192, 192, 192, 0.06) 0%, transparent 25%),
+        
+        /* Small accent circles */
+        radial-gradient(circle at 90% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 10% 50%, rgba(205, 127, 50, 0.05) 0%, transparent 20%);
+    
+    background-size: 
+        800px 800px,
+        700px 700px,
+        750px 750px,
+        600px 600px,
+        550px 550px,
+        400px 400px,
+        450px 450px;
+    
+    background-position: 
+        0% 0%,
+        100% 0%,
+        0% 100%,
+        100% 100%,
+        50% 50%,
+        80% 30%,
+        20% 70%;
+    
+    animation: floatShapes 25s ease-in-out infinite;
+}
+
+@keyframes floatShapes {
+    0%, 100% {
+        background-position: 
+            0% 0%,
+            100% 0%,
+            0% 100%,
+            100% 100%,
+            50% 50%,
+            80% 30%,
+            20% 70%;
+    }
+    50% {
+        background-position: 
+            10% 15%,
+            90% 10%,
+            5% 90%,
+            95% 85%,
+            55% 45%,
+            75% 35%,
+            25% 65%;
+    }
+}
+
+/* Trophy/Star Particles Effect */
+.background-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+    animation: floatParticle 15s infinite;
+}
+
+.particle::before {
+    content: '⭐';
+    font-size: 20px;
+    display: block;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+}
+
+/* Different emoji and size for each particle */
+.particle:nth-child(1)::before { content: '⭐'; font-size: 24px; }
+.particle:nth-child(2)::before { content: '🏆'; font-size: 32px; }
+.particle:nth-child(3)::before { content: '✨'; font-size: 18px; }
+.particle:nth-child(4)::before { content: '⭐'; font-size: 28px; }
+.particle:nth-child(5)::before { content: '🎯'; font-size: 20px; }
+.particle:nth-child(6)::before { content: '✨'; font-size: 26px; }
+.particle:nth-child(7)::before { content: '⭐'; font-size: 22px; }
+.particle:nth-child(8)::before { content: '🏆'; font-size: 30px; }
+
+/* Position particles */
+.particle:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 20s; }
+.particle:nth-child(2) { left: 25%; animation-delay: 3s; animation-duration: 18s; }
+.particle:nth-child(3) { left: 40%; animation-delay: 6s; animation-duration: 22s; }
+.particle:nth-child(4) { left: 55%; animation-delay: 2s; animation-duration: 19s; }
+.particle:nth-child(5) { left: 70%; animation-delay: 5s; animation-duration: 21s; }
+.particle:nth-child(6) { left: 85%; animation-delay: 8s; animation-duration: 17s; }
+.particle:nth-child(7) { left: 15%; animation-delay: 4s; animation-duration: 23s; }
+.particle:nth-child(8) { left: 90%; animation-delay: 7s; animation-duration: 20s; }
+
+@keyframes floatParticle {
+    0% {
+        bottom: -50px;
+        opacity: 0;
+        transform: translateX(0) rotate(0deg) scale(0.5);
+    }
+    10% {
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateX(30px) rotate(180deg) scale(1);
+    }
+    90% {
+        opacity: 0.4;
+    }
+    100% {
+        bottom: 110vh;
+        opacity: 0;
+        transform: translateX(-20px) rotate(360deg) scale(0.8);
+    }
+}
+
+/* Spotlight effect on header */
+.header-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 215, 0, 0.1) 0%,
+        rgba(255, 215, 0, 0.05) 30%,
+        transparent 60%
+    );
+    animation: rotateSpotlight 10s linear infinite;
+}
+
+@keyframes rotateSpotlight {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Shimmer effect on rank cards */
+.rank-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.rank-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    animation: shimmer 3s infinite;
+    animation-delay: calc(var(--index) * 0.1s);
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Medal glow for top 3 */
+.rank-item.rank-1::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+    transform: translateY(-50%);
+    pointer-events: none;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.rank-item.rank-2::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(192, 192, 192, 0.15) 0%, transparent 70%);
+    transform: translateY(-50%);
+    pointer-events: none;
+    animation: pulse 2s ease-in-out infinite;
+    animation-delay: 0.3s;
+}
+
+.rank-item.rank-3::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(205, 127, 50, 0.15) 0%, transparent 70%);
+    transform: translateY(-50%);
+    pointer-events: none;
+    animation: pulse 2s ease-in-out infinite;
+    animation-delay: 0.6s;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.5;
+        transform: translateY(-50%) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.2);
+    }
+}
+
+/* Ensure content is above effects */
+.rank-number,
+.team-info,
+.score-badge {
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive - reduce effects on mobile */
+@media (max-width: 768px) {
+    body::after {
+        opacity: 0.5;
+    }
+    
+    .particle {
+        display: none;
+    }
+    
+    .header-card::before {
+        animation-duration: 15s;
+    }
+}
