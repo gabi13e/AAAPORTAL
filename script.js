@@ -445,7 +445,16 @@ function displayStudentInfo(student) {
                 </div>
             </div>
             
-        
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 12px; margin-top: 24px; position: relative; z-index: 1;">
+                <button onclick="window.print()" style="flex: 1; padding: 12px; border: none; border-radius: 16px; background: #ECFDF5; color: #065F46; font-weight: 700; cursor: pointer; box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8), 6px 6px 12px rgba(16, 185, 129, 0.2); transition: all 0.3s ease;">
+                    🖨️ Print Receipt
+                </button>
+                <button onclick="performSearch()" style="flex: 1; padding: 12px; border: none; border-radius: 16px; background: #D1FAE5; color: #047857; font-weight: 700; cursor: pointer; box-shadow: -6px -6px 12px rgba(255, 255, 255, 0.8), 6px 6px 12px rgba(16, 185, 129, 0.2); transition: all 0.3s ease;">
+                    🔍 New Search
+                </button>
+            </div>
+        </div>
     `;
     searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
@@ -673,6 +682,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         cancelEdit.addEventListener('click', clearForm);
     }
     
+    // Add scroll zoom effect for search card
+    initScrollZoom();
+    
     // Check for admin parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true') {
@@ -695,6 +707,53 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     console.log('📝 Total students loaded:', students.length);
 });
+
+// Scroll Zoom Effect
+function initScrollZoom() {
+    const searchCard = document.querySelector('.search-card');
+    if (!searchCard) {
+        console.log('❌ Search card not found for zoom effect');
+        return;
+    }
+    
+    console.log('✅ Initializing scroll zoom effect');
+    
+    window.addEventListener('scroll', () => {
+        // Don't apply zoom effect if search results are showing
+        if (searchResults && searchResults.style.display === 'block') {
+            searchCard.style.transform = 'scale(1)';
+            searchCard.style.opacity = '1';
+            return;
+        }
+        
+        const cardRect = searchCard.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const cardCenter = cardRect.top + cardRect.height / 2;
+        const viewportCenter = windowHeight / 2;
+        
+        // Calculate how centered the card is in the viewport
+        const distanceFromCenter = Math.abs(cardCenter - viewportCenter);
+        const maxDistance = windowHeight / 2 + cardRect.height / 2;
+        const centerRatio = 1 - (distanceFromCenter / maxDistance);
+        
+        // If card is in view
+        if (cardRect.top < windowHeight && cardRect.bottom > 0) {
+            // Scale between 0.95 and 1.05 based on position
+            const scale = 0.95 + (centerRatio * 0.1);
+            const opacity = 0.7 + (centerRatio * 0.3);
+            
+            searchCard.style.transform = `scale(${Math.max(0.95, Math.min(1.05, scale))})`;
+            searchCard.style.opacity = Math.max(0.7, Math.min(1, opacity));
+        } else {
+            // Out of view
+            searchCard.style.transform = 'scale(0.95)';
+            searchCard.style.opacity = '0.7';
+        }
+    });
+    
+    // Trigger once on load
+    window.dispatchEvent(new Event('scroll'));
+}
 
 // Custom Alert Function
 function customAlert(message, type = 'info') {
