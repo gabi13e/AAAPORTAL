@@ -879,9 +879,9 @@ tr:last-child td {
 .multiple-records-container {
     background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
     border-radius: 24px;
-    padding: 32px;
+    padding: 40px;
     box-shadow:
-        -15px -15px 30px rgba(255, 255, 255, 0.7),
+        -15px -15px 30px rgba(255, 255, 255, ),
         15px 15px 30px rgba(0, 0, 0, 0.2);
     animation: fadeIn 0.4s ease;
     border: 3px solid #FBBF24;
@@ -889,6 +889,41 @@ tr:last-child td {
     overflow: hidden;
 }
 
+.multiple-records-list {
+    overflow-y: auto;
+    overflow-x: visible;
+    max-height: 450px;
+    padding-right: 16px;
+    margin-top: 5px;
+    cursor: grab;
+    user-select: none;
+    scroll-behavior: smooth;
+}
+
+.multiple-records-list:active {
+    cursor: grabbing;
+}
+
+/* Custom scrollbar for records list */
+.multiple-records-list::-webkit-scrollbar {
+    width: 10px;
+}
+
+.multiple-records-list::-webkit-scrollbar-track {
+    background: rgba(254, 243, 199, 0.5);
+    border-radius: 10px;
+    margin: 4px 0;
+}
+
+.multiple-records-list::-webkit-scrollbar-thumb {
+    background: #FBBF24;
+    border-radius: 10px;
+    border: 2px solid #FEF3C7;
+}
+
+.multiple-records-list::-webkit-scrollbar-thumb:hover {
+    background: #F59E0B;
+}
 /* Decorative circles in background */
 .multiple-records-container::before {
     content: '';

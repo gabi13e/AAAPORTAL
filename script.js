@@ -24,6 +24,7 @@ let heroSection;
 let adminSection;
 let adminBtn;
 let backToHome;
+let homeBtn;
 let searchInput;
 let searchBtn;
 let searchResults;
@@ -153,6 +154,12 @@ function showStudentView() {
         searchResults.style.display = 'none';
     }
     clearForm();
+    
+    // Scroll to top smoothly
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 }
 
 function addLogoutButton() {
@@ -212,26 +219,45 @@ function performSearch() {
     console.log('Search query:', query);
     
     if (!query) {
-        customAlert('Please enter your first name, last name, or OR number', 'warning');('Please enter your first name, last name, or OR number');
+        customAlert('Please enter your first name, last name, or OR number', 'warning');
         return;
     }
 
-    const matchingStudents = students.filter(s => 
-        s.firstName.toLowerCase().includes(query) || 
-        s.lastName.toLowerCase().includes(query) ||
-        s.fullName.toLowerCase().includes(query) ||
-        s.orNumber.toLowerCase().includes(query)
-    );
+    // Show loading state
+    searchBtn.classList.add('loading');
+    searchBtn.innerHTML = `
+        <div class="loading-spinner"></div>
+        <span>Searching...</span>
+    `;
+    
+    // Simulate search delay for better UX
+    setTimeout(() => {
+        const matchingStudents = students.filter(s => 
+            s.firstName.toLowerCase().includes(query) || 
+            s.lastName.toLowerCase().includes(query) ||
+            s.fullName.toLowerCase().includes(query) ||
+            s.orNumber.toLowerCase().includes(query)
+        );
 
-    console.log('Found matches:', matchingStudents.length);
+        console.log('Found matches:', matchingStudents.length);
 
-    if (matchingStudents.length === 1) {
-        displayStudentInfo(matchingStudents[0]);
-    } else if (matchingStudents.length > 1) {
-        displayMultipleMatches(matchingStudents);
-    } else {
-        displayNoResults();
-    }
+        if (matchingStudents.length === 1) {
+            displayStudentInfo(matchingStudents[0]);
+        } else if (matchingStudents.length > 1) {
+            displayMultipleMatches(matchingStudents);
+        } else {
+            displayNoResults();
+        }
+        
+        // Reset button
+        searchBtn.classList.remove('loading');
+        searchBtn.innerHTML = `
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <span>Search Payment</span>
+        `;
+    }, 300);
 }
 // Make selectStudent globally accessible
 window.selectStudent = function(index) {
@@ -254,7 +280,7 @@ function displayMultipleMatches(matches) {
                 </div>
             </div>
             <p class="multiple-records-subtitle">Please select your record below:</p>
-            <div>
+            <div class="multiple-records-list" id="recordsList">
                 ${matches.map((student) => {
                     const studentIndex = students.indexOf(student);
                     return `
@@ -281,6 +307,87 @@ function displayMultipleMatches(matches) {
     `;
     searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
+    
+    // Add drag-to-scroll functionality
+    initDragScroll();
+}
+
+// Drag-to-scroll functionality
+function initDragScroll() {
+    const scrollContainer = document.getElementById('recordsList');
+    if (!scrollContainer) return;
+    
+    let isDown = false;
+    let startY;
+    let scrollTop;
+    let velocity = 0;
+    let lastY = 0;
+    let lastTime = Date.now();
+    
+    scrollContainer.style.cursor = 'grab';
+    
+    scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startY = e.pageY - scrollContainer.offsetTop;
+        scrollTop = scrollContainer.scrollTop;
+        velocity = 0;
+        lastY = e.pageY;
+        lastTime = Date.now();
+        scrollContainer.style.scrollBehavior = 'auto';
+    });
+    
+    scrollContainer.addEventListener('mouseleave', () => {
+        if (isDown) {
+            isDown = false;
+            scrollContainer.style.cursor = 'grab';
+            applyMomentum();
+        }
+    });
+    
+    scrollContainer.addEventListener('mouseup', () => {
+        if (isDown) {
+            isDown = false;
+            scrollContainer.style.cursor = 'grab';
+            applyMomentum();
+        }
+    });
+    
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastTime;
+        
+        if (timeDiff > 0) {
+            const y = e.pageY - scrollContainer.offsetTop;
+            const walk = (y - startY) * 1.5; // Scroll speed multiplier
+            scrollContainer.scrollTop = scrollTop - walk;
+            
+            // Calculate velocity
+            const distance = e.pageY - lastY;
+            velocity = distance / timeDiff;
+            
+            lastY = e.pageY;
+            lastTime = currentTime;
+        }
+    });
+    
+    function applyMomentum() {
+        if (Math.abs(velocity) > 0.1) {
+            scrollContainer.scrollTop -= velocity * 16;
+            velocity *= 0.95; // Friction
+            requestAnimationFrame(applyMomentum);
+        } else {
+            scrollContainer.style.scrollBehavior = 'smooth';
+        }
+    }
+    
+    // Prevent text selection while dragging
+    scrollContainer.addEventListener('selectstart', (e) => {
+        if (isDown) e.preventDefault();
+    });
 }
 
 // Updated displayStudentInfo function
@@ -337,10 +444,14 @@ function displayStudentInfo(student) {
                     <p>🎉 Your contribution has been successfully received. Thank you!</p>
                 </div>
             </div>
-        </div>
+            
+        
     `;
     searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
+    
+    // Smooth scroll to results
+    searchResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Updated displayNoResults function
@@ -433,10 +544,10 @@ function saveStudent(e) {
 
     if (editId !== '') {
         students[parseInt(editId)] = student;
-        alert('✅ Student record updated!');
+        customAlert('Student record updated successfully!', 'success');
     } else {
         students.push(student);
-        alert('✅ Student record added!');
+        customAlert('Student record added successfully!', 'success');
     }
 
     clearForm();
@@ -468,7 +579,7 @@ function deleteStudent(index) {
     if (confirm(`⚠️ Are you sure you want to delete ${student.fullName}'s record?`)) {
         students.splice(index, 1);
         renderStudentsTable();
-        alert('✅ Student record deleted!');
+        customAlert('Student record deleted successfully!', 'success');
     }
 }
 
@@ -497,6 +608,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     adminSection = document.getElementById('adminSection');
     adminBtn = document.getElementById('adminBtn');
     backToHome = document.getElementById('backToHome');
+    homeBtn = document.getElementById('homeBtn');
     searchInput = document.getElementById('searchInput');
     searchBtn = document.getElementById('searchBtn');
     searchResults = document.getElementById('searchResults');
@@ -510,7 +622,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         searchInput: !!searchInput,
         searchBtn: !!searchBtn,
         searchResults: !!searchResults,
-        studentInfo: !!studentInfo
+        studentInfo: !!studentInfo,
+        homeBtn: !!homeBtn
     });
     
     // Attach event listeners
@@ -522,6 +635,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     if (backToHome) {
         backToHome.addEventListener('click', showStudentView);
+    }
+    
+    if (homeBtn) {
+        console.log('✅ Home button found and listener attached');
+        homeBtn.addEventListener('click', () => {
+            console.log('🏠 Home button clicked!');
+            showStudentView();
+        });
+    } else {
+        console.error('❌ Home button not found!');
     }
     
     if (searchBtn) {
@@ -654,14 +777,3 @@ function customAlert(message, type = 'info') {
     };
     document.addEventListener('keydown', handleEscape);
 }
-
-// Usage examples:
-// customAlert('Please enter your first name, last name, or OR number', 'warning');
-// customAlert('Student record added successfully!', 'success');
-// customAlert('Failed to connect to server', 'error');
-// customAlert('This is an informational message', 'info');
-
-// Replace all alert() calls in your code with customAlert()
-// Example in performSearch():
-// OLD: alert('Please enter your first name, last name, or OR number');
-// NEW: customAlert('Please enter your first name, last name, or OR number', 'warning');
