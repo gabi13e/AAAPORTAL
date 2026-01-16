@@ -601,9 +601,9 @@
                     sessionStorage.setItem('adminSession', JSON.stringify(session));
                 }
 
-                // Redirect to admin panel
+                // Redirect to admin dashboard
                 setTimeout(() => {
-                    window.location.href = 'index.html?admin=true';
+                    window.location.href = 'admin.html';
                 }, 1500);
 
             } else {
@@ -632,7 +632,7 @@
                 try {
                     const data = JSON.parse(session);
                     if (data.isLoggedIn) {
-                        window.location.href = 'index.html?admin=true';
+                        window.location.href = 'admin.html';
                     }
                 } catch (e) {
                     console.error('Invalid session data');

@@ -1,0 +1,712 @@
+/* ======================================
+   GLOBAL STYLES
+====================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: #F3F4F6;
+    color: #1F2937;
+    min-height: 100vh;
+}
+
+/* ======================================
+   TOP NAVIGATION
+====================================== */
+
+.top-navbar {
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-logo {
+    width: 48px;
+    height: 48px;
+    background: #F3F4F6;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.nav-info h1 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1F2937;
+}
+
+.nav-info p {
+    font-size: 0.875rem;
+    color: #6B7280;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: none;
+    background: #F3F4F6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: #E5E7EB;
+    transform: translateY(-1px);
+}
+
+.icon-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: #1F2937;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #EF4444;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: #DC2626;
+    transform: translateY(-1px);
+}
+
+.logout-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ======================================
+   DASHBOARD CONTAINER
+====================================== */
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+/* ======================================
+   STATISTICS CARDS
+====================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: #1F2937;
+}
+
+.stat-info h3 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1F2937;
+    margin-bottom: 4px;
+}
+
+.stat-info p {
+    font-size: 0.875rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* ======================================
+   FORM SECTION
+====================================== */
+
+.form-section {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 32px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1F2937;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-header svg {
+    width: 24px;
+    height: 24px;
+    stroke: #1F2937;
+}
+
+.student-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.required {
+    color: #EF4444;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+    color: #1F2937;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #9CA3AF;
+}
+
+.primary-btn {
+    padding: 14px 28px;
+    border-radius: 8px;
+    border: none;
+    background: #3B82F6;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+}
+
+.primary-btn:hover {
+    background: #2563EB;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.primary-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.secondary-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #E5E7EB;
+    background: #FFFFFF;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.secondary-btn:hover {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+}
+
+.secondary-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+/* ======================================
+   SEARCH SECTION
+====================================== */
+
+.search-section {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input-wrapper svg {
+    position: absolute;
+    left: 16px;
+    width: 20px;
+    height: 20px;
+    stroke: #9CA3AF;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 48px;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+}
+
+.search-input-wrapper input:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ======================================
+   TABLE SECTION
+====================================== */
+
+.table-section {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #F9FAFB;
+    border-bottom: 2px solid #E5E7EB;
+}
+
+th {
+    padding: 16px 24px;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #F3F4F6;
+    color: #1F2937;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #F9FAFB;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #D1FAE5;
+    color: #065F46;
+    border: 2px solid #10B981;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.edit-btn {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.edit-btn:hover {
+    background: #BFDBFE;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.delete-btn:hover {
+    background: #FECACA;
+    transform: translateY(-1px);
+}
+
+.edit-btn svg,
+.delete-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ======================================
+   EMPTY STATE
+====================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 64px 32px;
+}
+
+.empty-state svg {
+    width: 64px;
+    height: 64px;
+    stroke: #9CA3AF;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #6B7280;
+    font-size: 0.9375rem;
+}
+
+/* ======================================
+   MODAL
+====================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-icon.delete {
+    background: #FEE2E2;
+}
+
+.modal-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke: #991B1B;
+}
+
+.modal-content h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1F2937;
+    margin-bottom: 12px;
+}
+
+.modal-content p {
+    color: #6B7280;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.danger-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #EF4444;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.danger-btn:hover {
+    background: #DC2626;
+    transform: translateY(-1px);
+}
+
+/* ======================================
+   TOAST NOTIFICATION
+====================================== */
+
+.toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    background: #1F2937;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    max-width: 400px;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast.success {
+    background: #10B981;
+}
+
+.toast.error {
+    background: #EF4444;
+}
+
+.toast.warning {
+    background: #F59E0B;
+}
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+@media (max-width: 768px) {
+    .top-navbar {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .nav-left,
+    .nav-right {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dashboard-container {
+        padding: 16px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section,
+    .search-section {
+        padding: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .search-bar {
+        flex-direction: column;
+    }
+
+    th,
+    td {
+        padding: 12px 16px;
+        font-size: 0.875rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logout-btn span {
+        display: none;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
