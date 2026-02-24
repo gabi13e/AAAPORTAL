@@ -3,10 +3,10 @@
 // ============================================
 
 const GOOGLE_SHEETS_CONFIG = {
-    SHEET_ID: '1T5JvxVPCYId0Gz6NBY-C6oUTY_M_JjQk-aJD1Jt0ReM',  
-    API_KEY: 'AIzaSyBzGsup0tLQeMo91mCUXgDKsZ1lRl6pZ-E',
-    SHEET_NAME: 'OVERALL LIST',
-    RANGE: 'OVERALL LIST!A:E'  
+    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
+    API_KEY: 'AIzaSyCS0kRcYulb_QHujWJlEtDDvW-YkkC2iok',
+    SHEET_NAME: 'Sheet1',
+    RANGE: 'Sheet1!A:H'  
 };
 
 // ============================================
