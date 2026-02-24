@@ -5,8 +5,9 @@
 const GOOGLE_SHEETS_CONFIG = {
     SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
-    MEMBERSHIP_RANGE: 'MEMBERSHIP FEE!A:H',
-    SCHOLARS_DAY_RANGE: "SCHOLAR'S DAY FEE!A:H"
+    MEMBERSHIP_SHEET:   'MEMBERSHIP FEE',
+    SCHOLARS_DAY_SHEET: "SCHOLAR'S DAY FEE",
+    CELL_RANGE: 'A:H'
 };
 
 // ============================================
@@ -52,10 +53,17 @@ function logout() {
 // GOOGLE SHEETS API
 // ============================================
 
-async function fetchSheet(range) {
+async function fetchSheet(sheetName) {
+    // Wrap sheet name in single quotes if it contains spaces or apostrophes
+    // For the Sheets API, apostrophes in sheet names must be escaped as ''
+    const escapedName = sheetName.replace(/'/g, "''");
+    const range = `'${escapedName}'!${GOOGLE_SHEETS_CONFIG.CELL_RANGE}`;
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(range)}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText}`);
+    }
     return response.json();
 }
 
@@ -81,8 +89,8 @@ async function loadStudentsFromSheets() {
 
     try {
         const [memData, sdData] = await Promise.all([
-            fetchSheet(GOOGLE_SHEETS_CONFIG.MEMBERSHIP_RANGE),
-            fetchSheet(GOOGLE_SHEETS_CONFIG.SCHOLARS_DAY_RANGE)
+            fetchSheet(GOOGLE_SHEETS_CONFIG.MEMBERSHIP_SHEET),
+            fetchSheet(GOOGLE_SHEETS_CONFIG.SCHOLARS_DAY_SHEET)
         ]);
 
         membershipStudents  = parseRows(memData,  'Membership Fee');
@@ -97,10 +105,11 @@ async function loadStudentsFromSheets() {
         }
         return true;
     } catch (error) {
-        console.error('❌ Error loading from Google Sheets:', error);
+        console.error('❌ Error loading from Google Sheets:', error.message);
+        console.error('Full error:', error);
         loadSampleData();
         hideToast();
-        showToast('Could not connect to Google Sheets. Using sample data.', '#ef4444', 5000);
+        showToast(`Connection error: ${error.message}`, '#ef4444', 7000);
         return false;
     } finally {
         isLoading = false;
@@ -222,9 +231,11 @@ function performSearch() {
 // ============================================
 
 function displayStudentInfo(idNumber, memMatches, sdMatches) {
-    const anyRecord = memMatches[0] || sdMatches[0];
 
-    // Build membership fee rows
+    // Use the ID number exactly as stored in the sheet (preserves dashes)
+    const displayId = (memMatches[0] || sdMatches[0])?.idNumber || idNumber;
+
+    // Build fee card rows
     const buildRows = (matches, feeLabel, borderColor, bgColor, textColor) => {
         if (matches.length === 0) return '';
         return matches.map(m => `
@@ -257,22 +268,63 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
         `).join('');
     };
 
-    const membershipHTML   = buildRows(memMatches, 'Membership Fee',    '#2563EB', '#EFF6FF', '#1E3A8A');
-    const scholarsDayHTML  = buildRows(sdMatches,  "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
+    const membershipHTML  = buildRows(memMatches, 'Membership Fee',    '#2563EB', '#EFF6FF', '#1E3A8A');
+    const scholarsDayHTML = buildRows(sdMatches,  "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
 
     // Not-paid placeholder cards
     const memNotPaid = `
         <div style="background:#EFF6FF;border:2px dashed #2563EB;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
-            <div style="font-size:1.5rem;margin-bottom:6px;">💙</div>
+            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
             <div style="font-weight:800;color:#1E3A8A;margin-bottom:4px;">Membership Fee</div>
             <div style="color:#3B82F6;font-size:0.9rem;">No payment record found</div>
         </div>`;
     const sdNotPaid = `
-        <div style="background:#FEF2F2;border:2px dashed #DC2626;border-radius:16px;padding:20px;text-align:center;">
-            <div style="font-size:1.5rem;margin-bottom:6px;">❤️</div>
+        <div style="background:#FEF2F2;border:2px dashed #DC2626;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
             <div style="font-weight:800;color:#7F1D1D;margin-bottom:4px;">Scholar's Day Fee</div>
             <div style="color:#EF4444;font-size:0.9rem;">No payment record found</div>
         </div>`;
+
+    // Determine overall status
+    const bothPaid   = memMatches.length > 0 && sdMatches.length > 0;
+    const partialPaid = (memMatches.length > 0) !== (sdMatches.length > 0); // XOR — only one paid
+    const missingFee  = memMatches.length === 0
+        ? 'Membership Fee'
+        : "Scholar's Day Fee";
+
+    const overallStatusCard = bothPaid ? `
+        <div class="payment-status-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <span class="payment-status-label">Overall Status</span>
+                <div class="payment-status-badge-wrapper">
+                    <div class="payment-status-checkmark">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="payment-status-badge">FULLY PAID</div>
+                </div>
+            </div>
+            <div class="payment-success-message" style="margin-top:12px;">
+                <p>🎉 All contributions have been successfully received. Thank you!</p>
+            </div>
+        </div>
+    ` : `
+        <div style="background:#FFFBEB;border:3px solid #F59E0B;border-radius:20px;padding:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                <span style="font-weight:800;color:#92400E;font-size:1.1rem;">Overall Status</span>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.3rem;">⚠️</span>
+                    <span style="background:#FEF3C7;border:2px solid #F59E0B;padding:10px 22px;border-radius:999px;font-weight:800;color:#92400E;font-size:1rem;">INCOMPLETE</span>
+                </div>
+            </div>
+            <div style="background:#FEF3C7;border-radius:12px;padding:14px;text-align:center;">
+                <p style="font-size:0.9rem;color:#92400E;font-weight:600;margin:0;">
+                    ⚠️ <strong>${missingFee}</strong> has not been paid yet. Please settle your remaining balance.
+                </p>
+            </div>
+        </div>
+    `;
 
     studentInfo.innerHTML = `
         <div class="payment-verified-container">
@@ -286,34 +338,18 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                     </div>
                     <span>Record Found</span>
                 </div>
-                <div class="payment-receipt-number">ID: ${idNumber}</div>
+                <div class="payment-receipt-number">ID: ${displayId}</div>
             </div>
 
             <!-- Fee Records -->
             <div style="margin-bottom:16px;">
                 <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">📋 Payment Records</div>
-
                 ${membershipHTML  || memNotPaid}
                 ${scholarsDayHTML || sdNotPaid}
             </div>
 
-            <!-- Summary -->
-            <div class="payment-status-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                    <span class="payment-status-label">Overall Status</span>
-                    <div class="payment-status-badge-wrapper">
-                        <div class="payment-status-checkmark">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                        </div>
-                        <div class="payment-status-badge">PAID</div>
-                    </div>
-                </div>
-                <div class="payment-success-message" style="margin-top:12px;">
-                    <p>🎉 Your contribution has been successfully received. Thank you!</p>
-                </div>
-            </div>
+            <!-- Overall Status -->
+            ${overallStatusCard}
         </div>
     `;
 
