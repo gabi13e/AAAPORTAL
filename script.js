@@ -4,7 +4,7 @@
 
 const GOOGLE_SHEETS_CONFIG = {
     SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
-    API_KEY: 'AIzaSyCS0kRcYulb_QHujWJlEtDDvW-YkkC2iok',
+    API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
     SHEET_NAME: 'Sheet1',
     RANGE: 'Sheet1!A:H'  
 };
