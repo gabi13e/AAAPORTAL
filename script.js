@@ -257,8 +257,22 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
         `).join('');
     };
 
-    const membershipHTML   = buildRows(memMatches, 'Membership Fee',    '#10B981', '#ECFDF5', '#065F46');
-    const scholarsDayHTML  = buildRows(sdMatches,  "Scholar's Day Fee", '#6366F1', '#EEF2FF', '#3730A3');
+    const membershipHTML   = buildRows(memMatches, 'Membership Fee',    '#2563EB', '#EFF6FF', '#1E3A8A');
+    const scholarsDayHTML  = buildRows(sdMatches,  "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
+
+    // Not-paid placeholder cards
+    const memNotPaid = `
+        <div style="background:#EFF6FF;border:2px dashed #2563EB;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:6px;">💙</div>
+            <div style="font-weight:800;color:#1E3A8A;margin-bottom:4px;">Membership Fee</div>
+            <div style="color:#3B82F6;font-size:0.9rem;">No payment record found</div>
+        </div>`;
+    const sdNotPaid = `
+        <div style="background:#FEF2F2;border:2px dashed #DC2626;border-radius:16px;padding:20px;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:6px;">❤️</div>
+            <div style="font-weight:800;color:#7F1D1D;margin-bottom:4px;">Scholar's Day Fee</div>
+            <div style="color:#EF4444;font-size:0.9rem;">No payment record found</div>
+        </div>`;
 
     studentInfo.innerHTML = `
         <div class="payment-verified-container">
@@ -279,8 +293,8 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
             <div style="margin-bottom:16px;">
                 <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">📋 Payment Records</div>
 
-                ${membershipHTML || `<div style="background:#F9FAFB;border:2px dashed #D1D5DB;border-radius:16px;padding:16px;text-align:center;color:#9CA3AF;margin-bottom:12px;">No Membership Fee record found</div>`}
-                ${scholarsDayHTML || `<div style="background:#F9FAFB;border:2px dashed #D1D5DB;border-radius:16px;padding:16px;text-align:center;color:#9CA3AF;">No Scholar's Day Fee record found</div>`}
+                ${membershipHTML  || memNotPaid}
+                ${scholarsDayHTML || sdNotPaid}
             </div>
 
             <!-- Summary -->
@@ -351,8 +365,8 @@ function renderStudentsTable(searchQuery = '') {
     studentsTable.innerHTML = toDisplay.map((s) => {
         const idx = students.indexOf(s);
         const sheetTag = s.feeLabel === 'Membership Fee'
-            ? `<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">MEM</span>`
-            : `<span style="background:#EEF2FF;color:#3730A3;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">SD</span>`;
+            ? `<span style="background:#EFF6FF;color:#1E3A8A;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #2563EB;">MEM</span>`
+            : `<span style="background:#FEF2F2;color:#7F1D1D;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #DC2626;">SD</span>`;
         return `
             <tr>
                 <td style="padding:16px 24px;">${s.idNumber}</td>
