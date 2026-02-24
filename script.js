@@ -5,48 +5,38 @@
 const GOOGLE_SHEETS_CONFIG = {
     SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
-    SHEET_NAME: 'Sheet1',
-    RANGE: 'Sheet1!A:H'  
+    MEMBERSHIP_RANGE: 'MEMBERSHIP FEE!A:H',
+    SCHOLARS_DAY_RANGE: "SCHOLAR'S DAY FEE!A:H"
 };
 
 // ============================================
 // DATABASE (Loaded from Google Sheets)
 // ============================================
 
-let students = [];
+let membershipStudents = [];
+let scholarsDayStudents = [];
+let students = []; // combined / used for admin table
 let isLoading = false;
 
 // ============================================
-// DOM ELEMENTS (Will be initialized after DOM loads)
+// DOM ELEMENTS
 // ============================================
 
-let heroSection;
-let adminSection;
-let adminBtn;
-let backToHome;
-let homeBtn;
-let searchInput;
-let searchBtn;
-let searchResults;
-let studentInfo;
-let studentForm;
-let studentsTable;
-let cancelEdit;
+let heroSection, adminSection, adminBtn, backToHome, homeBtn;
+let searchInput, searchBtn, searchResults, studentInfo;
+let studentForm, studentsTable, cancelEdit;
 
 // ============================================
-// AUTHENTICATION FUNCTIONS
+// AUTHENTICATION
 // ============================================
 
 function checkAuthentication() {
     const session = localStorage.getItem('adminSession') || sessionStorage.getItem('adminSession');
-    
     if (session) {
         try {
             const data = JSON.parse(session);
             return data.isLoggedIn === true;
-        } catch (e) {
-            return false;
-        }
+        } catch (e) { return false; }
     }
     return false;
 }
@@ -55,64 +45,62 @@ function logout() {
     localStorage.removeItem('adminSession');
     sessionStorage.removeItem('adminSession');
     showStudentView();
-    showLogoutMessage();
-}
-
-function showLogoutMessage() {
-    const message = document.createElement('div');
-    message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
-    message.innerHTML = '<div style="display: flex; align-items: center; gap: 12px;"><span>✓</span><span>Logged out successfully</span></div>';
-    document.body.appendChild(message);
-    setTimeout(() => message.remove(), 3000);
+    showToast('Logged out successfully', '#3b82f6');
 }
 
 // ============================================
-// GOOGLE SHEETS API FUNCTIONS
+// GOOGLE SHEETS API
 // ============================================
+
+async function fetchSheet(range) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(range)}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+}
+
+function parseRows(data, feeLabel) {
+    if (!data.values || data.values.length < 2) return [];
+    return data.values.slice(1)
+        .filter(row => row[0])
+        .map(row => ({
+            idNumber:       (row[0] || '').trim(),
+            receiptNumber:  (row[1] || 'N/A').trim(),
+            lastName:       (row[2] || '').trim(),
+            firstName:      (row[3] || '').trim(),
+            date:           (row[4] || 'N/A').trim(),
+            scholarshipType:(row[5] || 'N/A').trim(),
+            fee:            (row[6] || 'N/A').trim(),
+            feeLabel:       feeLabel
+        }));
+}
 
 async function loadStudentsFromSheets() {
     isLoading = true;
-    showLoadingMessage('Loading student data...');
-    
+    showToast('Loading student data...', '#3b82f6', 99999);
+
     try {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${GOOGLE_SHEETS_CONFIG.RANGE}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const [memData, sdData] = await Promise.all([
+            fetchSheet(GOOGLE_SHEETS_CONFIG.MEMBERSHIP_RANGE),
+            fetchSheet(GOOGLE_SHEETS_CONFIG.SCHOLARS_DAY_RANGE)
+        ]);
+
+        membershipStudents  = parseRows(memData,  'Membership Fee');
+        scholarsDayStudents = parseRows(sdData,   "Scholar's Day Fee");
+        students = [...membershipStudents, ...scholarsDayStudents];
+
+        console.log(`✅ Loaded ${membershipStudents.length} membership + ${scholarsDayStudents.length} scholar's day records`);
+        hideToast();
+
+        if (adminSection && adminSection.style.display !== 'none') {
+            renderStudentsTable();
         }
-        
-        const data = await response.json();
-        
-        if (data.values && data.values.length > 1) {
-            students = data.values.slice(1)
-                .filter(row => row[0] || row[1])
-                .map(row => ({
-                    firstName: (row[0] || '').trim(),
-                    lastName: (row[1] || '').trim(),
-                    fullName: `${(row[0] || '').trim()} ${(row[1] || '').trim()}`.trim(),
-                    orNumber: (row[2] || 'N/A').trim(),
-                    date: (row[3] || 'N/A').trim(),
-                    scholarshipType: (row[4] || 'N/A').trim(),
-                    status: 'Paid'
-                }));
-            
-            console.log('✅ Successfully loaded', students.length, 'students from Google Sheets');
-            hideLoadingMessage();
-            
-            if (adminSection && !adminSection.classList.contains('hidden')) {
-                renderStudentsTable();
-            }
-            
-            return true;
-        } else {
-            throw new Error('No data found in sheet');
-        }
+        return true;
     } catch (error) {
         console.error('❌ Error loading from Google Sheets:', error);
         loadSampleData();
-        showErrorMessage('Could not connect to Google Sheets. Using sample data.');
+        hideToast();
+        showToast('Could not connect to Google Sheets. Using sample data.', '#ef4444', 5000);
         return false;
     } finally {
         isLoading = false;
@@ -120,87 +108,71 @@ async function loadStudentsFromSheets() {
 }
 
 function loadSampleData() {
-    students = [
-        { firstName: 'Juan', lastName: 'Dela Cruz', fullName: 'Juan Dela Cruz', orNumber: 'OR-001', date: '2025-01-01', scholarshipType: 'Academic Scholar', status: 'Paid' },
-        { firstName: 'Maria', lastName: 'Santos', fullName: 'Maria Santos', orNumber: 'OR-002', date: '2025-01-02', scholarshipType: 'Sports Scholar', status: 'Paid' },
-        { firstName: 'Pedro', lastName: 'Garcia', fullName: 'Pedro Garcia', orNumber: 'OR-003', date: '2025-01-03', scholarshipType: 'Academic Scholar', status: 'Paid' },
-        { firstName: 'Ana', lastName: 'Reyes', fullName: 'Ana Reyes', orNumber: 'OR-004', date: '2025-01-04', scholarshipType: 'Arts Scholar', status: 'Paid' },
-        { firstName: 'Carlos', lastName: 'Mendoza', fullName: 'Carlos Mendoza', orNumber: 'OR-005', date: '2025-01-05', scholarshipType: 'Academic Scholar', status: 'Paid' },
+    membershipStudents = [
+        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', feeLabel:'Membership Fee' },
+        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', feeLabel:'Membership Fee' },
     ];
-    console.log('⚠️ Using sample data (5 students)');
+    scholarsDayStudents = [
+        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', feeLabel:"Scholar's Day Fee" },
+    ];
+    students = [...membershipStudents, ...scholarsDayStudents];
 }
 
 // ============================================
-// NAVIGATION FUNCTIONS
+// NAVIGATION
 // ============================================
 
 function showAdminPanel() {
-    if (!checkAuthentication()) {
-        window.location.href = 'login.html';
-        return;
-    }
-
+    if (!checkAuthentication()) { window.location.href = 'login.html'; return; }
     heroSection.style.display = 'none';
-    adminSection.classList.remove('hidden');
+    adminSection.style.display = 'block';
     renderStudentsTable();
     addLogoutButton();
 }
 
 function showStudentView() {
-    adminSection.classList.add('hidden');
+    adminSection.style.display = 'none';
     heroSection.style.display = 'block';
     if (searchResults) {
-        searchResults.classList.add('hidden');
         searchResults.style.display = 'none';
     }
     clearForm();
-    
-    // Scroll to top smoothly
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function addLogoutButton() {
     if (document.getElementById('logoutBtn')) return;
-
-    const backToHomeBtn = document.getElementById('backToHome');
     const logoutBtn = document.createElement('button');
     logoutBtn.id = 'logoutBtn';
     logoutBtn.className = 'nav-btn';
-    logoutBtn.style.cssText = 'background: #dc2626; margin-left: 12px;';
+    logoutBtn.style.cssText = 'background:#dc2626;color:#fff;margin-left:12px;';
     logoutBtn.innerHTML = '🚪 Logout';
     logoutBtn.addEventListener('click', logout);
-    
-    backToHomeBtn.parentElement.insertBefore(logoutBtn, backToHomeBtn.nextSibling);
+    backToHome.parentElement.insertBefore(logoutBtn, backToHome.nextSibling);
 }
 
 // ============================================
-// UI HELPER FUNCTIONS
+// TOAST HELPERS
 // ============================================
 
-function showLoadingMessage(message) {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = 'loadingMessage';
-    loadingDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
-    loadingDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span>⏳</span><span>${message}</span></div>`;
-    document.body.appendChild(loadingDiv);
-}
+let toastEl = null;
+let toastTimer = null;
 
-function hideLoadingMessage() {
-    const loadingDiv = document.getElementById('loadingMessage');
-    if (loadingDiv) {
-        loadingDiv.remove();
+function showToast(message, color = '#3b82f6', duration = 3000) {
+    hideToast();
+    toastEl = document.createElement('div');
+    toastEl.id = 'toastMessage';
+    toastEl.style.cssText = `position:fixed;top:20px;right:20px;background:${color};color:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.15);z-index:10000;font-weight:600;`;
+    toastEl.textContent = message;
+    document.body.appendChild(toastEl);
+    if (duration < 99999) {
+        toastTimer = setTimeout(hideToast, duration);
     }
 }
 
-function showErrorMessage(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;';
-    errorDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px;"><span>⚠️</span><span>${message}</span></div>`;
-    document.body.appendChild(errorDiv);
-    setTimeout(() => errorDiv.remove(), 5000);
+function hideToast() {
+    if (toastTimer) clearTimeout(toastTimer);
+    if (toastEl) { toastEl.remove(); toastEl = null; }
 }
 
 // ============================================
@@ -208,392 +180,203 @@ function showErrorMessage(message) {
 // ============================================
 
 function performSearch() {
-    console.log('🔍 performSearch called');
-    
-    if (!searchInput) {
-        console.error('❌ searchInput element not found!');
-        return;
-    }
-    
-    const query = searchInput.value.toLowerCase().trim();
-    console.log('Search query:', query);
-    
+    if (!searchInput) return;
+
+    const query = searchInput.value.trim();
+
     if (!query) {
-        customAlert('Please enter your first name, last name, or OR number', 'warning');
+        customAlert('Please enter your ID Number to search.', 'warning');
         return;
     }
 
-    // Show loading state
-    searchBtn.classList.add('loading');
-    searchBtn.innerHTML = `
-        <div class="loading-spinner"></div>
-        <span>Searching...</span>
-    `;
-    
-    // Simulate search delay for better UX
+    // Validate: only allow ID number searches (digits, dashes)
+    // Accept anything that looks like an ID number
+    const queryLower = query.toLowerCase();
+
+    // Find all matching records across BOTH sheets by ID number only
+    const memMatches = membershipStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
+    const sdMatches  = scholarsDayStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
+
+    // Show button loading state
+    searchBtn.innerHTML = `<span>Searching...</span>`;
+    searchBtn.disabled = true;
+
     setTimeout(() => {
-        const matchingStudents = students.filter(s => 
-            s.firstName.toLowerCase().includes(query) || 
-            s.lastName.toLowerCase().includes(query) ||
-            s.fullName.toLowerCase().includes(query) ||
-            s.orNumber.toLowerCase().includes(query)
-        );
-
-        console.log('Found matches:', matchingStudents.length);
-
-        if (matchingStudents.length === 1) {
-            displayStudentInfo(matchingStudents[0]);
-        } else if (matchingStudents.length > 1) {
-            displayMultipleMatches(matchingStudents);
-        } else {
-            displayNoResults();
-        }
-        
-        // Reset button
-        searchBtn.classList.remove('loading');
         searchBtn.innerHTML = `
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <span>Search Payment</span>
-        `;
+            <span>Search Payment</span>`;
+        searchBtn.disabled = false;
+
+        if (memMatches.length === 0 && sdMatches.length === 0) {
+            displayNoResults(query);
+        } else {
+            displayStudentInfo(query, memMatches, sdMatches);
+        }
     }, 300);
 }
-// Make selectStudent globally accessible
-window.selectStudent = function(index) {
-    displayStudentInfo(students[index]);
-};
 
-// Updated displayMultipleMatches function
-function displayMultipleMatches(matches) {
-    studentInfo.innerHTML = `
-        <div class="multiple-records-container">
-            <div class="multiple-records-header">
-                <div class="multiple-records-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 32px; height: 32px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+// ============================================
+// DISPLAY FUNCTIONS
+// ============================================
+
+function displayStudentInfo(idNumber, memMatches, sdMatches) {
+    const anyRecord = memMatches[0] || sdMatches[0];
+
+    // Build membership fee rows
+    const buildRows = (matches, feeLabel, borderColor, bgColor, textColor) => {
+        if (matches.length === 0) return '';
+        return matches.map(m => `
+            <div style="background:${bgColor};border:2px solid ${borderColor};border-radius:16px;padding:20px;margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                    <span style="font-weight:800;color:${textColor};font-size:1.05rem;">${feeLabel}</span>
+                    <span style="font-family:monospace;font-weight:700;background:#fff;padding:6px 14px;border-radius:10px;border:2px solid ${borderColor};color:${textColor};font-size:0.9rem;">
+                        Receipt #${m.receiptNumber}
+                    </span>
                 </div>
-                <div class="multiple-records-title">
-                    <h3>Multiple Records Found</h3>
-                    <p>Found ${matches.length} students matching your search</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Date</div>
+                        <div style="font-weight:700;color:${textColor};">${m.date}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Scholarship Type</div>
+                        <div style="font-weight:700;color:${textColor};">${m.scholarshipType}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Amount Paid</div>
+                        <div style="font-weight:800;color:${textColor};font-size:1.1rem;">₱ ${m.fee}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
+                        <div style="font-weight:800;color:${textColor};">✓ PAID</div>
+                    </div>
                 </div>
             </div>
-            <p class="multiple-records-subtitle">Please select your record below:</p>
-            <div class="multiple-records-list" id="recordsList">
-                ${matches.map((student) => {
-                    const studentIndex = students.indexOf(student);
-                    return `
-                        <button onclick="window.selectStudent(${studentIndex})" class="student-card-btn">
-                            <div class="student-card-header">
-                                <div class="student-card-name">${student.fullName}</div>
-                                <div class="student-card-receipt">${student.orNumber}</div>
-                            </div>
-                            <div class="student-card-details">
-                                <div class="student-card-detail-item">
-                                    <span class="student-card-detail-label">Date</span>
-                                    <span class="student-card-detail-value">${student.date}</span>
-                                </div>
-                                <div class="student-card-detail-item">
-                                    <span class="student-card-detail-label">Scholarship</span>
-                                    <span class="student-card-detail-value">${student.scholarshipType}</span>
-                                </div>
-                            </div>
-                        </button>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-    `;
-    searchResults.classList.remove('hidden');
-    searchResults.style.display = 'block';
-    
-    // Add drag-to-scroll functionality
-    initDragScroll();
-}
+        `).join('');
+    };
 
-// Drag-to-scroll functionality
-function initDragScroll() {
-    const scrollContainer = document.getElementById('recordsList');
-    if (!scrollContainer) return;
-    
-    let isDown = false;
-    let startY;
-    let scrollTop;
-    let velocity = 0;
-    let lastY = 0;
-    let lastTime = Date.now();
-    
-    scrollContainer.style.cursor = 'grab';
-    
-    scrollContainer.addEventListener('mousedown', (e) => {
-        isDown = true;
-        scrollContainer.style.cursor = 'grabbing';
-        startY = e.pageY - scrollContainer.offsetTop;
-        scrollTop = scrollContainer.scrollTop;
-        velocity = 0;
-        lastY = e.pageY;
-        lastTime = Date.now();
-        scrollContainer.style.scrollBehavior = 'auto';
-    });
-    
-    scrollContainer.addEventListener('mouseleave', () => {
-        if (isDown) {
-            isDown = false;
-            scrollContainer.style.cursor = 'grab';
-            applyMomentum();
-        }
-    });
-    
-    scrollContainer.addEventListener('mouseup', () => {
-        if (isDown) {
-            isDown = false;
-            scrollContainer.style.cursor = 'grab';
-            applyMomentum();
-        }
-    });
-    
-    scrollContainer.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        
-        const currentTime = Date.now();
-        const timeDiff = currentTime - lastTime;
-        
-        if (timeDiff > 0) {
-            const y = e.pageY - scrollContainer.offsetTop;
-            const walk = (y - startY) * 1.5; // Scroll speed multiplier
-            scrollContainer.scrollTop = scrollTop - walk;
-            
-            // Calculate velocity
-            const distance = e.pageY - lastY;
-            velocity = distance / timeDiff;
-            
-            lastY = e.pageY;
-            lastTime = currentTime;
-        }
-    });
-    
-    function applyMomentum() {
-        if (Math.abs(velocity) > 0.1) {
-            scrollContainer.scrollTop -= velocity * 16;
-            velocity *= 0.95; // Friction
-            requestAnimationFrame(applyMomentum);
-        } else {
-            scrollContainer.style.scrollBehavior = 'smooth';
-        }
-    }
-    
-    // Prevent text selection while dragging
-    scrollContainer.addEventListener('selectstart', (e) => {
-        if (isDown) e.preventDefault();
-    });
-}
+    const membershipHTML   = buildRows(memMatches, 'Membership Fee',    '#10B981', '#ECFDF5', '#065F46');
+    const scholarsDayHTML  = buildRows(sdMatches,  "Scholar's Day Fee", '#6366F1', '#EEF2FF', '#3730A3');
 
-// Updated displayStudentInfo function
-function displayStudentInfo(student) {
     studentInfo.innerHTML = `
         <div class="payment-verified-container">
+            <!-- Header -->
             <div class="payment-verified-header">
                 <div class="payment-verified-badge">
                     <div class="payment-verified-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <span>Payment Verified</span>
+                    <span>Record Found</span>
                 </div>
-                <div class="payment-receipt-number">${student.orNumber}</div>
+                <div class="payment-receipt-number">ID: ${idNumber}</div>
             </div>
-            
-            <div class="payment-name-section">
-                <div class="payment-name-item">
-                    <span class="payment-name-label">First Name</span>
-                    <div class="payment-name-value">${student.firstName}</div>
-                </div>
-                <div class="payment-name-item">
-                    <span class="payment-name-label">Last Name</span>
-                    <div class="payment-name-value">${student.lastName}</div>
-                </div>
+
+            <!-- Fee Records -->
+            <div style="margin-bottom:16px;">
+                <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">📋 Payment Records</div>
+
+                ${membershipHTML || `<div style="background:#F9FAFB;border:2px dashed #D1D5DB;border-radius:16px;padding:16px;text-align:center;color:#9CA3AF;margin-bottom:12px;">No Membership Fee record found</div>`}
+                ${scholarsDayHTML || `<div style="background:#F9FAFB;border:2px dashed #D1D5DB;border-radius:16px;padding:16px;text-align:center;color:#9CA3AF;">No Scholar's Day Fee record found</div>`}
             </div>
-            
-            <div class="payment-details-card">
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">Scholarship Type</span>
-                    <span class="payment-detail-value">${student.scholarshipType}</span>
-                </div>
-                <div class="payment-detail-row">
-                    <span class="payment-detail-label">Payment Date</span>
-                    <span class="payment-detail-value">${student.date}</span>
-                </div>
-            </div>
-            
+
+            <!-- Summary -->
             <div class="payment-status-card">
-                <div class="payment-status-row">
-                    <span class="payment-status-label">Payment Status</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <span class="payment-status-label">Overall Status</span>
                     <div class="payment-status-badge-wrapper">
                         <div class="payment-status-checkmark">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                             </svg>
                         </div>
                         <div class="payment-status-badge">PAID</div>
                     </div>
                 </div>
-                <div class="payment-success-message">
+                <div class="payment-success-message" style="margin-top:12px;">
                     <p>🎉 Your contribution has been successfully received. Thank you!</p>
                 </div>
             </div>
-            
-           
+        </div>
     `;
-    searchResults.classList.remove('hidden');
+
     searchResults.style.display = 'block';
-    
-    // Smooth scroll to results
     searchResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Updated displayNoResults function
-function displayNoResults() {
+function displayNoResults(query) {
     studentInfo.innerHTML = `
         <div class="no-results-container">
             <div class="no-results-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 48px; height: 48px;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:48px;height:48px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </div>
-            <p class="no-results-title">No record found with that name or OR number.</p>
-            <p class="no-results-description">Please check the spelling or try searching with your OR number.</p>
+            <p class="no-results-title">No record found for ID: "${query}"</p>
+            <p class="no-results-description">Please double-check your ID Number and try again.</p>
         </div>
     `;
-    searchResults.classList.remove('hidden');
     searchResults.style.display = 'block';
 }
+
 // ============================================
 // ADMIN PANEL FUNCTIONS
 // ============================================
 
 function renderStudentsTable(searchQuery = '') {
-    const studentsToDisplay = searchQuery 
-        ? students.filter(s => 
-            s.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.orNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.scholarshipType.toLowerCase().includes(searchQuery.toLowerCase())
+    const query = searchQuery.toLowerCase();
+    const toDisplay = query
+        ? students.filter(s =>
+            s.idNumber.toLowerCase().includes(query) ||
+            s.lastName.toLowerCase().includes(query) ||
+            s.firstName.toLowerCase().includes(query) ||
+            s.receiptNumber.toLowerCase().includes(query) ||
+            s.scholarshipType.toLowerCase().includes(query) ||
+            s.feeLabel.toLowerCase().includes(query)
           )
         : students;
 
-    if (studentsToDisplay.length === 0) {
+    if (toDisplay.length === 0) {
         studentsTable.innerHTML = `
-            <tr>
-                <td colspan="7" style="padding: 32px; text-align: center; color: #6b7280;">
-                    <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
-                    <p style="font-weight: 700;">No students found</p>
-                    <p style="font-size: 0.875rem;">Try adjusting your search</p>
-                </td>
-            </tr>
-        `;
+            <tr><td colspan="8" style="padding:32px;text-align:center;color:#6b7280;">
+                <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+                <p style="font-weight:700;">No records found</p>
+            </td></tr>`;
         return;
     }
 
-    studentsTable.innerHTML = studentsToDisplay.map((student) => {
-        const actualIndex = students.indexOf(student);
-        
+    studentsTable.innerHTML = toDisplay.map((s) => {
+        const idx = students.indexOf(s);
+        const sheetTag = s.feeLabel === 'Membership Fee'
+            ? `<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">MEM</span>`
+            : `<span style="background:#EEF2FF;color:#3730A3;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;">SD</span>`;
         return `
             <tr>
-                <td style="padding: 16px 24px;">${student.orNumber}</td>
-                <td style="padding: 16px 24px;">${student.firstName}</td>
-                <td style="padding: 16px 24px;">${student.lastName}</td>
-                <td style="padding: 16px 24px;">${student.date}</td>
-                <td style="padding: 16px 24px;">${student.scholarshipType}</td>
-                <td style="padding: 16px 24px;">
-                    <span style="padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background: #d1fae5; color: #065f46; border: 2px solid #10b981;">
-                        ✓ PAID
-                    </span>
+                <td style="padding:16px 24px;">${s.idNumber}</td>
+                <td style="padding:16px 24px;">${s.receiptNumber}</td>
+                <td style="padding:16px 24px;">${s.lastName}</td>
+                <td style="padding:16px 24px;">${s.firstName}</td>
+                <td style="padding:16px 24px;">${s.date}</td>
+                <td style="padding:16px 24px;">${s.scholarshipType}</td>
+                <td style="padding:16px 24px;">${sheetTag} ₱${s.fee}</td>
+                <td style="padding:16px 24px;">
+                    <span style="padding:4px 12px;border-radius:9999px;font-size:0.75rem;font-weight:700;background:#d1fae5;color:#065f46;border:2px solid #10b981;">✓ PAID</span>
                 </td>
-                <td style="padding: 16px 24px;">
-                    <button onclick="editStudent(${actualIndex})" style="color: #2563eb; font-weight: 700; margin-right: 12px; cursor: pointer; background: none; border: none;">
-                        ✏️ Edit
-                    </button>
-                    <button onclick="deleteStudent(${actualIndex})" style="color: #dc2626; font-weight: 700; cursor: pointer; background: none; border: none;">
-                        🗑️ Delete
-                    </button>
-                </td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
-}
-
-function saveStudent(e) {
-    e.preventDefault();
-    
-    const editId = document.getElementById('editId').value;
-    const receiptNo = document.getElementById('receiptNo');
-    
-    const student = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        fullName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
-        orNumber: receiptNo ? receiptNo.value : 'N/A',
-        date: document.getElementById('date').value,
-        scholarshipType: document.getElementById('scholarshipType').value,
-        status: 'Paid'
-    };
-
-    if (editId !== '') {
-        students[parseInt(editId)] = student;
-        customAlert('Student record updated successfully!', 'success');
-    } else {
-        students.push(student);
-        customAlert('Student record added successfully!', 'success');
-    }
-
-    clearForm();
-    renderStudentsTable();
-}
-
-function editStudent(index) {
-    const student = students[index];
-    
-    document.getElementById('editId').value = index;
-    document.getElementById('firstName').value = student.firstName;
-    document.getElementById('lastName').value = student.lastName;
-    
-    const receiptNo = document.getElementById('receiptNo');
-    if (receiptNo) {
-        receiptNo.value = student.orNumber;
-    }
-    
-    document.getElementById('date').value = student.date;
-    document.getElementById('scholarshipType').value = student.scholarshipType;
-    
-    cancelEdit.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function deleteStudent(index) {
-    const student = students[index];
-    
-    if (confirm(`⚠️ Are you sure you want to delete ${student.fullName}'s record?`)) {
-        students.splice(index, 1);
-        renderStudentsTable();
-        customAlert('Student record deleted successfully!', 'success');
-    }
 }
 
 function clearForm() {
     if (studentForm) {
         studentForm.reset();
         document.getElementById('editId').value = '';
-        cancelEdit.classList.add('hidden');
+        if (cancelEdit) cancelEdit.classList.add('hidden');
     }
 }
 
-// Make functions available globally
-window.editStudent = editStudent;
-window.deleteStudent = deleteStudent;
 window.performSearch = performSearch;
 
 // ============================================
@@ -601,229 +384,127 @@ window.performSearch = performSearch;
 // ============================================
 
 window.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Student Clearance System Starting...');
-    
-    // Initialize DOM elements
-    heroSection = document.getElementById('heroSection');
-    adminSection = document.getElementById('adminSection');
-    adminBtn = document.getElementById('adminBtn');
-    backToHome = document.getElementById('backToHome');
-    homeBtn = document.getElementById('homeBtn');
-    searchInput = document.getElementById('searchInput');
-    searchBtn = document.getElementById('searchBtn');
-    searchResults = document.getElementById('searchResults');
-    studentInfo = document.getElementById('studentInfo');
-    studentForm = document.getElementById('studentForm');
-    studentsTable = document.getElementById('studentsTable');
-    cancelEdit = document.getElementById('cancelEdit');
-    
-    // Log element status
-    console.log('Elements found:', {
-        searchInput: !!searchInput,
-        searchBtn: !!searchBtn,
-        searchResults: !!searchResults,
-        studentInfo: !!studentInfo,
-        homeBtn: !!homeBtn
-    });
-    
-    // Attach event listeners
-    if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-            window.location.href = 'login.html';
-        });
+    heroSection    = document.getElementById('heroSection');
+    adminSection   = document.getElementById('adminSection');
+    adminBtn       = document.getElementById('adminBtn');
+    backToHome     = document.getElementById('backToHome');
+    homeBtn        = document.getElementById('homeBtn');
+    searchInput    = document.getElementById('searchInput');
+    searchBtn      = document.getElementById('searchBtn');
+    searchResults  = document.getElementById('searchResults');
+    studentInfo    = document.getElementById('studentInfo');
+    studentForm    = document.getElementById('studentForm');
+    studentsTable  = document.getElementById('studentsTable');
+    cancelEdit     = document.getElementById('cancelEdit');
+
+    // Update placeholder text
+    if (searchInput) {
+        searchInput.placeholder = 'Enter your ID Number (e.g. 2023-2445)...';
     }
-    
-    if (backToHome) {
-        backToHome.addEventListener('click', showStudentView);
-    }
-    
-    if (homeBtn) {
-        console.log('✅ Home button found and listener attached');
-        homeBtn.addEventListener('click', () => {
-            console.log('🏠 Home button clicked!');
-            showStudentView();
-        });
-    } else {
-        console.error('❌ Home button not found!');
-    }
-    
+
+    // Update search header text
+    const searchHeaderP = document.querySelector('.search-header p');
+    if (searchHeaderP) searchHeaderP.textContent = 'Enter your ID Number to check payment status';
+
+    // Event listeners
+    if (adminBtn)    adminBtn.addEventListener('click', () => window.location.href = 'login.html');
+    if (backToHome)  backToHome.addEventListener('click', showStudentView);
+    if (homeBtn)     homeBtn.addEventListener('click', showStudentView);
+
     if (searchBtn) {
-        searchBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Search button clicked!');
-            performSearch();
-        });
+        searchBtn.addEventListener('click', (e) => { e.preventDefault(); performSearch(); });
     }
-    
+
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                console.log('Enter pressed in search input');
-                performSearch();
-            }
+            if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
         });
     }
-    
-    if (studentForm) {
-        studentForm.addEventListener('submit', saveStudent);
+
+    if (studentForm) studentForm.addEventListener('submit', (e) => { e.preventDefault(); });
+    if (cancelEdit)  cancelEdit.addEventListener('click', clearForm);
+
+    // Admin search
+    const adminSearchInput = document.getElementById('adminSearchInput');
+    if (adminSearchInput) {
+        adminSearchInput.addEventListener('input', () => renderStudentsTable(adminSearchInput.value));
     }
-    
-    if (cancelEdit) {
-        cancelEdit.addEventListener('click', clearForm);
-    }
-    
-    // Add scroll zoom effect for search card
+
     initScrollZoom();
-    
-    // Check for admin parameter
+
+    // Check for admin param
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('admin') === 'true') {
-        if (checkAuthentication()) {
-            showAdminPanel();
-        } else {
-            window.location.href = 'login.html';
-        }
+    if (urlParams.get('admin') === 'true' && checkAuthentication()) {
+        showAdminPanel();
     }
-    
-    // Load data
-    console.log('📊 Attempting to connect to Google Sheets...');
-    const success = await loadStudentsFromSheets();
-    
-    if (success) {
-        console.log('✅ Google Sheets connection successful!');
-    } else {
-        console.log('⚠️ Using sample data.');
-    }
-    
-    console.log('📝 Total students loaded:', students.length);
+
+    // Load data from both sheets
+    await loadStudentsFromSheets();
 });
 
-// Scroll Zoom Effect
+// ============================================
+// SCROLL ZOOM EFFECT
+// ============================================
+
 function initScrollZoom() {
     const searchCard = document.querySelector('.search-card');
-    if (!searchCard) {
-        console.log('❌ Search card not found for zoom effect');
-        return;
-    }
-    
-    console.log('✅ Initializing scroll zoom effect');
-    
+    if (!searchCard) return;
+
     window.addEventListener('scroll', () => {
-        // Don't apply zoom effect if search results are showing
         if (searchResults && searchResults.style.display === 'block') {
             searchCard.style.transform = 'scale(1)';
-            searchCard.style.opacity = '1';
+            searchCard.style.opacity   = '1';
             return;
         }
-        
-        const cardRect = searchCard.getBoundingClientRect();
+        const cardRect     = searchCard.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        const cardCenter = cardRect.top + cardRect.height / 2;
-        const viewportCenter = windowHeight / 2;
-        
-        // Calculate how centered the card is in the viewport
-        const distanceFromCenter = Math.abs(cardCenter - viewportCenter);
-        const maxDistance = windowHeight / 2 + cardRect.height / 2;
-        const centerRatio = 1 - (distanceFromCenter / maxDistance);
-        
-        // If card is in view
+        const cardCenter   = cardRect.top + cardRect.height / 2;
+        const distFromCenter = Math.abs(cardCenter - windowHeight / 2);
+        const maxDistance    = windowHeight / 2 + cardRect.height / 2;
+        const ratio          = 1 - distFromCenter / maxDistance;
+
         if (cardRect.top < windowHeight && cardRect.bottom > 0) {
-            // Scale between 0.95 and 1.05 based on position
-            const scale = 0.95 + (centerRatio * 0.1);
-            const opacity = 0.7 + (centerRatio * 0.3);
-            
-            searchCard.style.transform = `scale(${Math.max(0.95, Math.min(1.05, scale))})`;
-            searchCard.style.opacity = Math.max(0.7, Math.min(1, opacity));
+            searchCard.style.transform = `scale(${Math.max(0.95, Math.min(1.05, 0.95 + ratio * 0.1))})`;
+            searchCard.style.opacity   = Math.max(0.7, Math.min(1, 0.7 + ratio * 0.3));
         } else {
-            // Out of view
             searchCard.style.transform = 'scale(0.95)';
-            searchCard.style.opacity = '0.7';
+            searchCard.style.opacity   = '0.7';
         }
     });
-    
-    // Trigger once on load
     window.dispatchEvent(new Event('scroll'));
 }
 
-// Custom Alert Function
+// ============================================
+// CUSTOM ALERT MODAL
+// ============================================
+
 function customAlert(message, type = 'info') {
-    // Remove any existing modals
-    const existingModal = document.querySelector('.custom-modal-overlay');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Determine icon based on type
-    let icon = '';
-    let title = '';
-    
-    switch(type) {
-        case 'warning':
-            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>`;
-            title = 'Attention Required';
-            break;
-        case 'success':
-            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>`;
-            title = 'Success';
-            break;
-        case 'error':
-            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>`;
-            title = 'Error';
-            break;
-        default:
-            icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>`;
-            title = 'Information';
-    }
-    
-    // Create modal overlay
+    const existing = document.querySelector('.custom-modal-overlay');
+    if (existing) existing.remove();
+
+    const icons = {
+        warning: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`,
+        success: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        error:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        info:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+    };
+    const titles = { warning:'Attention Required', success:'Success', error:'Error', info:'Information' };
+
     const overlay = document.createElement('div');
     overlay.className = 'custom-modal-overlay';
-    
-    // Create modal
     overlay.innerHTML = `
         <div class="custom-modal ${type}">
-            <div class="custom-modal-icon">
-                ${icon}
-            </div>
+            <div class="custom-modal-icon">${icons[type] || icons.info}</div>
             <div class="custom-modal-content">
-                <h3 class="custom-modal-title">${title}</h3>
+                <h3 class="custom-modal-title">${titles[type] || 'Notice'}</h3>
                 <p class="custom-modal-message">${message}</p>
                 <button class="custom-modal-button">OK</button>
             </div>
-        </div>
-    `;
-    
-    // Add to body
+        </div>`;
     document.body.appendChild(overlay);
-    
-    // Close modal on button click
-    const button = overlay.querySelector('.custom-modal-button');
-    button.addEventListener('click', () => {
-        overlay.remove();
+    overlay.querySelector('.custom-modal-button').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.addEventListener('keydown', function esc(e) {
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
     });
-    
-    // Close modal on overlay click
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.remove();
-        }
-    });
-    
-    // Close modal on Escape key
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            overlay.remove();
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
-    document.addEventListener('keydown', handleEscape);
 }
