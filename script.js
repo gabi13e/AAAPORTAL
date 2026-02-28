@@ -7,7 +7,7 @@ const GOOGLE_SHEETS_CONFIG = {
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
     MEMBERSHIP_SHEET:   'MEMBERSHIP FEE',
     SCHOLARS_DAY_SHEET: "SCHOLAR'S DAY FEE",
-    CELL_RANGE: 'A:H'
+    CELL_RANGE: 'A:I'  // Extended to column I to include Collected By
 };
 
 // ============================================
@@ -54,8 +54,6 @@ function logout() {
 // ============================================
 
 async function fetchSheet(sheetName) {
-    // Wrap sheet name in single quotes if it contains spaces or apostrophes
-    // For the Sheets API, apostrophes in sheet names must be escaped as ''
     const escapedName = sheetName.replace(/'/g, "''");
     const range = `'${escapedName}'!${GOOGLE_SHEETS_CONFIG.CELL_RANGE}`;
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(range)}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
@@ -79,6 +77,7 @@ function parseRows(data, feeLabel) {
             date:           (row[4] || 'N/A').trim(),
             scholarshipType:(row[5] || 'N/A').trim(),
             fee:            (row[6] || 'N/A').trim(),
+            collectedBy:    (row[7] || 'N/A').trim(),   // ← NEW: Column H
             feeLabel:       feeLabel
         }));
 }
@@ -118,11 +117,11 @@ async function loadStudentsFromSheets() {
 
 function loadSampleData() {
     membershipStudents = [
-        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', feeLabel:'Membership Fee' },
-        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', feeLabel:'Membership Fee' },
+        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', collectedBy:'Maria Santos', feeLabel:'Membership Fee' },
+        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', collectedBy:'Juan Dela Cruz', feeLabel:'Membership Fee' },
     ];
     scholarsDayStudents = [
-        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', feeLabel:"Scholar's Day Fee" },
+        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', collectedBy:'Anna Reyes', feeLabel:"Scholar's Day Fee" },
     ];
     students = [...membershipStudents, ...scholarsDayStudents];
 }
@@ -198,8 +197,6 @@ function performSearch() {
         return;
     }
 
-    // Validate: only allow ID number searches (digits, dashes)
-    // Accept anything that looks like an ID number
     const queryLower = query.toLowerCase();
 
     // Find all matching records across BOTH sheets by ID number only
@@ -232,10 +229,9 @@ function performSearch() {
 
 function displayStudentInfo(idNumber, memMatches, sdMatches) {
 
-    // Use the ID number exactly as stored in the sheet (preserves dashes)
     const displayId = (memMatches[0] || sdMatches[0])?.idNumber || idNumber;
 
-    // Build fee card rows
+    // Build fee card rows — now includes Collected By
     const buildRows = (matches, feeLabel, borderColor, bgColor, textColor) => {
         if (matches.length === 0) return '';
         return matches.map(m => `
@@ -263,6 +259,10 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
                         <div style="font-weight:800;color:${textColor};">✓ PAID</div>
                     </div>
+                    <div style="grid-column: 1 / -1;">
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Collected By</div>
+                        <div style="font-weight:700;color:${textColor};">👤 ${m.collectedBy !== 'N/A' ? m.collectedBy : 'Not recorded'}</div>
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -286,8 +286,7 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
         </div>`;
 
     // Determine overall status
-    const bothPaid   = memMatches.length > 0 && sdMatches.length > 0;
-    const partialPaid = (memMatches.length > 0) !== (sdMatches.length > 0); // XOR — only one paid
+    const bothPaid    = memMatches.length > 0 && sdMatches.length > 0;
     const missingFee  = memMatches.length === 0
         ? 'Membership Fee'
         : "Scholar's Day Fee";
@@ -385,13 +384,14 @@ function renderStudentsTable(searchQuery = '') {
             s.firstName.toLowerCase().includes(query) ||
             s.receiptNumber.toLowerCase().includes(query) ||
             s.scholarshipType.toLowerCase().includes(query) ||
-            s.feeLabel.toLowerCase().includes(query)
+            s.feeLabel.toLowerCase().includes(query) ||
+            (s.collectedBy || '').toLowerCase().includes(query)  // ← searchable too
           )
         : students;
 
     if (toDisplay.length === 0) {
         studentsTable.innerHTML = `
-            <tr><td colspan="8" style="padding:32px;text-align:center;color:#6b7280;">
+            <tr><td colspan="9" style="padding:32px;text-align:center;color:#6b7280;">
                 <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
                 <p style="font-weight:700;">No records found</p>
             </td></tr>`;
@@ -399,7 +399,6 @@ function renderStudentsTable(searchQuery = '') {
     }
 
     studentsTable.innerHTML = toDisplay.map((s) => {
-        const idx = students.indexOf(s);
         const sheetTag = s.feeLabel === 'Membership Fee'
             ? `<span style="background:#EFF6FF;color:#1E3A8A;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #2563EB;">MEM</span>`
             : `<span style="background:#FEF2F2;color:#7F1D1D;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #DC2626;">SD</span>`;
@@ -412,6 +411,7 @@ function renderStudentsTable(searchQuery = '') {
                 <td style="padding:16px 24px;">${s.date}</td>
                 <td style="padding:16px 24px;">${s.scholarshipType}</td>
                 <td style="padding:16px 24px;">${sheetTag} ₱${s.fee}</td>
+                <td style="padding:16px 24px;">👤 ${s.collectedBy !== 'N/A' ? s.collectedBy : '—'}</td>
                 <td style="padding:16px 24px;">
                     <span style="padding:4px 12px;border-radius:9999px;font-size:0.75rem;font-weight:700;background:#d1fae5;color:#065f46;border:2px solid #10b981;">✓ PAID</span>
                 </td>
