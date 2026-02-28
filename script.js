@@ -236,13 +236,16 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
         if (matches.length === 0) return '';
         return matches.map(m => `
             <div style="background:${bgColor};border:2px solid ${borderColor};border-radius:16px;padding:20px;margin-bottom:12px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;margin-bottom:12px;">
                     <span style="font-weight:800;color:${textColor};font-size:1.05rem;">${feeLabel}</span>
-                    <span style="font-family:monospace;font-weight:700;background:#fff;padding:6px 14px;border-radius:10px;border:2px solid ${borderColor};color:${textColor};font-size:0.9rem;">
-                        Receipt #${m.receiptNumber}
-                    </span>
+                    <div></div>
+                    <div style="text-align:right;">
+                        <span style="font-family:monospace;font-weight:700;background:#fff;padding:6px 14px;border-radius:10px;border:2px solid ${borderColor};color:${textColor};font-size:0.9rem;">
+                            Receipt #${m.receiptNumber}
+                        </span>
+                    </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 0;">
                     <div>
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Date</div>
                         <div style="font-weight:700;color:${textColor};">${m.date}</div>
@@ -251,19 +254,18 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Scholarship Type</div>
                         <div style="font-weight:700;color:${textColor};">${m.scholarshipType}</div>
                     </div>
+                    <div></div>
                     <div>
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Amount Paid</div>
                         <div style="font-weight:800;color:${textColor};font-size:1.1rem;">₱ ${m.fee}</div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
-                            <div style="font-weight:800;color:${textColor};">✓ PAID</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Collected By</div>
-                            <div style="font-weight:700;color:${textColor};">👤 ${m.collectedBy !== 'N/A' ? m.collectedBy : 'Not recorded'}</div>
-                        </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
+                        <div style="font-weight:800;color:${textColor};">✓ PAID</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Collected By</div>
+                        <div style="font-weight:700;color:${textColor};">👤 ${m.collectedBy !== 'N/A' ? m.collectedBy : 'Not recorded'}</div>
                     </div>
                 </div>
             </div>
