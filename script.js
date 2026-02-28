@@ -242,12 +242,12 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                         Receipt #${m.receiptNumber}
                     </span>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                    <div style="grid-column:1/2;">
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Date</div>
                         <div style="font-weight:700;color:${textColor};">${m.date}</div>
                     </div>
-                    <div>
+                    <div style="grid-column:2/4;">
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Scholarship Type</div>
                         <div style="font-weight:700;color:${textColor};">${m.scholarshipType}</div>
                     </div>
@@ -255,15 +255,13 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Amount Paid</div>
                         <div style="font-weight:800;color:${textColor};font-size:1.1rem;">₱ ${m.fee}</div>
                     </div>
-                    <div style="display:flex;gap:32px;align-items:flex-start;">
-                        <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
-                            <div style="font-weight:800;color:${textColor};">✓ PAID</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Collected By</div>
-                            <div style="font-weight:700;color:${textColor};">👤 ${m.collectedBy !== 'N/A' ? m.collectedBy : 'Not recorded'}</div>
-                        </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
+                        <div style="font-weight:800;color:${textColor};">✓ PAID</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Collected By</div>
+                        <div style="font-weight:700;color:${textColor};">👤 ${m.collectedBy !== 'N/A' ? m.collectedBy : 'Not recorded'}</div>
                     </div>
                 </div>
             </div>
