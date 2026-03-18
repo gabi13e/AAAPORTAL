@@ -3,11 +3,14 @@
 // ============================================
 
 const GOOGLE_SHEETS_CONFIG = {
-    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
+    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
-    MEMBERSHIP_SHEET:   'MEMBERSHIP FEE',
-    SCHOLARS_DAY_SHEET: "SCHOLAR'S DAY FEE",
-    CELL_RANGE: 'A:I'  // Extended to column I to include Collected By
+    SHEETS: [
+        { name: 'MEMBERSHIP FEE 2026',    feeLabel: 'Membership Fee',    year: '2026', type: 'membership'  },
+        { name: "SCHOLAR'S DAY FEE 2025", feeLabel: "Scholar's Day Fee", year: '2025', type: 'scholarsday' },
+        { name: "SCHOLAR'S DAY FEE 2026", feeLabel: "Scholar's Day Fee", year: '2026', type: 'scholarsday' },
+    ],
+    CELL_RANGE: 'A:I'
 };
 
 // ============================================
@@ -16,8 +19,9 @@ const GOOGLE_SHEETS_CONFIG = {
 
 let membershipStudents = [];
 let scholarsDayStudents = [];
-let students = []; // combined / used for admin table
+let students = [];
 let isLoading = false;
+let activeYearFilter = 'all';
 
 // ============================================
 // DOM ELEMENTS
@@ -65,7 +69,7 @@ async function fetchSheet(sheetName) {
     return response.json();
 }
 
-function parseRows(data, feeLabel) {
+function parseRows(data, feeLabel, year) {
     if (!data.values || data.values.length < 2) return [];
     return data.values.slice(1)
         .filter(row => row[0])
@@ -77,8 +81,9 @@ function parseRows(data, feeLabel) {
             date:           (row[4] || 'N/A').trim(),
             scholarshipType:(row[5] || 'N/A').trim(),
             fee:            (row[6] || 'N/A').trim(),
-            collectedBy:    (row[7] || 'N/A').trim(),   // ← NEW: Column H
-            feeLabel:       feeLabel
+            collectedBy:    (row[7] || 'N/A').trim(),
+            feeLabel:       feeLabel,
+            year:           year
         }));
 }
 
@@ -87,13 +92,22 @@ async function loadStudentsFromSheets() {
     showToast('Loading student data...', '#3b82f6', 99999);
 
     try {
-        const [memData, sdData] = await Promise.all([
-            fetchSheet(GOOGLE_SHEETS_CONFIG.MEMBERSHIP_SHEET),
-            fetchSheet(GOOGLE_SHEETS_CONFIG.SCHOLARS_DAY_SHEET)
-        ]);
+        const results = await Promise.all(
+            GOOGLE_SHEETS_CONFIG.SHEETS.map(s => fetchSheet(s.name))
+        );
 
-        membershipStudents  = parseRows(memData,  'Membership Fee');
-        scholarsDayStudents = parseRows(sdData,   "Scholar's Day Fee");
+        membershipStudents  = [];
+        scholarsDayStudents = [];
+
+        GOOGLE_SHEETS_CONFIG.SHEETS.forEach((sheetConfig, i) => {
+            const rows = parseRows(results[i], sheetConfig.feeLabel, sheetConfig.year);
+            if (sheetConfig.type === 'membership') {
+                membershipStudents.push(...rows);
+            } else {
+                scholarsDayStudents.push(...rows);
+            }
+        });
+
         students = [...membershipStudents, ...scholarsDayStudents];
 
         console.log(`✅ Loaded ${membershipStudents.length} membership + ${scholarsDayStudents.length} scholar's day records`);
@@ -102,6 +116,8 @@ async function loadStudentsFromSheets() {
         if (adminSection && adminSection.style.display !== 'none') {
             renderStudentsTable();
         }
+
+        renderYearFilter();
         return true;
     } catch (error) {
         console.error('❌ Error loading from Google Sheets:', error.message);
@@ -117,14 +133,106 @@ async function loadStudentsFromSheets() {
 
 function loadSampleData() {
     membershipStudents = [
-        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', collectedBy:'Maria Santos', feeLabel:'Membership Fee' },
-        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', collectedBy:'Juan Dela Cruz', feeLabel:'Membership Fee' },
+        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', collectedBy:'Maria Santos', feeLabel:'Membership Fee', year:'2026' },
+        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', collectedBy:'Juan Dela Cruz', feeLabel:'Membership Fee', year:'2026' },
     ];
     scholarsDayStudents = [
-        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', collectedBy:'Anna Reyes', feeLabel:"Scholar's Day Fee" },
+        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', collectedBy:'Anna Reyes', feeLabel:"Scholar's Day Fee", year:'2025' },
     ];
     students = [...membershipStudents, ...scholarsDayStudents];
 }
+
+// ============================================
+// YEAR FILTER
+// ============================================
+
+function renderYearFilter() {
+    // Collect unique years from loaded data, sorted descending
+    const years = ['all', ...new Set(students.map(s => s.year))].sort((a, b) => {
+        if (a === 'all') return -1;
+        if (b === 'all') return 1;
+        return b - a;
+    });
+
+    const btnStyle = (y) => `
+        padding:6px 18px;
+        border-radius:999px;
+        font-weight:700;
+        font-size:0.8rem;
+        cursor:pointer;
+        border:2px solid #2563EB;
+        background:${activeYearFilter === y ? '#2563EB' : '#fff'};
+        color:${activeYearFilter === y ? '#fff' : '#2563EB'};
+        transition:all 0.2s;
+    `;
+
+    const btns = years.map(y => `
+        <button onclick="setYearFilter('${y}')" id="yfBtn-${y}" style="${btnStyle(y)}">
+            ${y === 'all' ? 'All Years' : y}
+        </button>`).join('');
+
+    // --- Student search page filter ---
+    let studentFilter = document.getElementById('yearFilterStudent');
+    if (!studentFilter) {
+        studentFilter = document.createElement('div');
+        studentFilter.id = 'yearFilterStudent';
+        studentFilter.style.cssText = `
+            display:flex;
+            gap:8px;
+            justify-content:center;
+            align-items:center;
+            flex-wrap:wrap;
+            margin-bottom:16px;
+        `;
+        // Insert above the search input inside the search card
+        const searchCard = document.querySelector('.search-card');
+        if (searchCard) {
+            const searchInputWrapper = searchInput ? searchInput.closest('div') || searchInput.parentElement : null;
+            if (searchInputWrapper && searchCard.contains(searchInputWrapper)) {
+                searchCard.insertBefore(studentFilter, searchInputWrapper);
+            } else {
+                searchCard.prepend(studentFilter);
+            }
+        }
+    }
+    if (studentFilter) {
+        studentFilter.innerHTML =
+            `<span style="font-weight:700;color:#374151;font-size:0.85rem;">Filter by year:</span>` + btns;
+    }
+
+    // --- Admin panel filter ---
+    let adminFilter = document.getElementById('yearFilterAdmin');
+    if (!adminFilter) {
+        adminFilter = document.createElement('div');
+        adminFilter.id = 'yearFilterAdmin';
+        adminFilter.style.cssText = `display:flex;gap:8px;align-items:center;margin-left:12px;flex-wrap:wrap;`;
+        const adminSearchInput = document.getElementById('adminSearchInput');
+        if (adminSearchInput && adminSearchInput.parentElement) {
+            adminSearchInput.parentElement.appendChild(adminFilter);
+        }
+    }
+    if (adminFilter) {
+        adminFilter.innerHTML = btns;
+    }
+}
+
+function setYearFilter(year) {
+    activeYearFilter = year;
+    renderYearFilter();
+
+    // Re-render admin table if open
+    if (adminSection && adminSection.style.display !== 'none') {
+        const adminSearchInput = document.getElementById('adminSearchInput');
+        renderStudentsTable(adminSearchInput ? adminSearchInput.value : '');
+    }
+
+    // Re-run search if results are visible
+    if (searchResults && searchResults.style.display === 'block') {
+        performSearch();
+    }
+}
+
+window.setYearFilter = setYearFilter;
 
 // ============================================
 // NAVIGATION
@@ -135,6 +243,7 @@ function showAdminPanel() {
     heroSection.style.display = 'none';
     adminSection.style.display = 'block';
     renderStudentsTable();
+    renderYearFilter();
     addLogoutButton();
 }
 
@@ -199,11 +308,16 @@ function performSearch() {
 
     const queryLower = query.toLowerCase();
 
-    // Find all matching records across BOTH sheets by ID number only
-    const memMatches = membershipStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
-    const sdMatches  = scholarsDayStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
+    // Filter by ID AND active year filter
+    const memMatches = membershipStudents.filter(s =>
+        s.idNumber.toLowerCase() === queryLower &&
+        (activeYearFilter === 'all' || s.year === activeYearFilter)
+    );
+    const sdMatches = scholarsDayStudents.filter(s =>
+        s.idNumber.toLowerCase() === queryLower &&
+        (activeYearFilter === 'all' || s.year === activeYearFilter)
+    );
 
-    // Show button loading state
     searchBtn.innerHTML = `<span>Searching...</span>`;
     searchBtn.disabled = true;
 
@@ -231,7 +345,6 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
 
     const displayId = (memMatches[0] || sdMatches[0])?.idNumber || idNumber;
 
-    // Build fee card rows — now includes Collected By
     const buildRows = (matches, feeLabel, borderColor, bgColor, textColor) => {
         if (matches.length === 0) return '';
         return matches.map(m => `
@@ -239,6 +352,7 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
                     <div>
                         <div style="font-weight:800;color:${textColor};font-size:1.05rem;">${feeLabel}</div>
+                        <div style="font-size:0.75rem;font-weight:600;color:${textColor};opacity:0.6;margin-top:2px;">AY ${m.year}</div>
                     </div>
                     <div></div>
                     <div style="text-align:right;">
@@ -275,25 +389,21 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
     const membershipHTML  = buildRows(memMatches, 'Membership Fee',    '#2563EB', '#EFF6FF', '#1E3A8A');
     const scholarsDayHTML = buildRows(sdMatches,  "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
 
-    // Not-paid placeholder cards
+    const yearLabel = activeYearFilter === 'all' ? '' : ` for ${activeYearFilter}`;
+
     const memNotPaid = `
         <div style="background:#EFF6FF;border:2px dashed #2563EB;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
-            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
-            <div style="font-weight:800;color:#1E3A8A;margin-bottom:4px;">Membership Fee</div>
+            <div style="font-weight:800;color:#1E3A8A;margin-bottom:4px;">Membership Fee${yearLabel}</div>
             <div style="color:#3B82F6;font-size:0.9rem;">No payment record found</div>
         </div>`;
     const sdNotPaid = `
         <div style="background:#FEF2F2;border:2px dashed #DC2626;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
-            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
-            <div style="font-weight:800;color:#7F1D1D;margin-bottom:4px;">Scholar's Day Fee</div>
+            <div style="font-weight:800;color:#7F1D1D;margin-bottom:4px;">Scholar's Day Fee${yearLabel}</div>
             <div style="color:#EF4444;font-size:0.9rem;">No payment record found</div>
         </div>`;
 
-    // Determine overall status
-    const bothPaid    = memMatches.length > 0 && sdMatches.length > 0;
-    const missingFee  = memMatches.length === 0
-        ? 'Membership Fee'
-        : "Scholar's Day Fee";
+    const bothPaid   = memMatches.length > 0 && sdMatches.length > 0;
+    const missingFee = memMatches.length === 0 ? 'Membership Fee' : "Scholar's Day Fee";
 
     const overallStatusCard = bothPaid ? `
         <div class="payment-status-card">
@@ -331,7 +441,6 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
 
     studentInfo.innerHTML = `
         <div class="payment-verified-container">
-            <!-- Header -->
             <div class="payment-verified-header">
                 <div class="payment-verified-badge">
                     <div class="payment-verified-icon">
@@ -344,14 +453,14 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                 <div class="payment-receipt-number">ID: ${displayId}</div>
             </div>
 
-            <!-- Fee Records -->
             <div style="margin-bottom:16px;">
-                <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">📋 Payment Records</div>
+                <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">
+                    📋 Payment Records${yearLabel ? ` — ${activeYearFilter}` : ''}
+                </div>
                 ${membershipHTML  || memNotPaid}
                 ${scholarsDayHTML || sdNotPaid}
             </div>
 
-            <!-- Overall Status -->
             ${overallStatusCard}
         </div>
     `;
@@ -361,6 +470,7 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
 }
 
 function displayNoResults(query) {
+    const yearLabel = activeYearFilter === 'all' ? '' : ` in ${activeYearFilter}`;
     studentInfo.innerHTML = `
         <div class="no-results-container">
             <div class="no-results-icon">
@@ -368,8 +478,8 @@ function displayNoResults(query) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </div>
-            <p class="no-results-title">No record found for ID: "${query}"</p>
-            <p class="no-results-description">Please double-check your ID Number and try again.</p>
+            <p class="no-results-title">No record found for ID: "${query}"${yearLabel}</p>
+            <p class="no-results-description">Please double-check your ID Number and try again${activeYearFilter !== 'all' ? ', or try "All Years"' : ''}.</p>
         </div>
     `;
     searchResults.style.display = 'block';
@@ -381,17 +491,19 @@ function displayNoResults(query) {
 
 function renderStudentsTable(searchQuery = '') {
     const query = searchQuery.toLowerCase();
-    const toDisplay = query
-        ? students.filter(s =>
+    const toDisplay = students.filter(s => {
+        const matchesYear = activeYearFilter === 'all' || s.year === activeYearFilter;
+        const matchesQuery = !query ||
             s.idNumber.toLowerCase().includes(query) ||
             s.lastName.toLowerCase().includes(query) ||
             s.firstName.toLowerCase().includes(query) ||
             s.receiptNumber.toLowerCase().includes(query) ||
             s.scholarshipType.toLowerCase().includes(query) ||
             s.feeLabel.toLowerCase().includes(query) ||
-            (s.collectedBy || '').toLowerCase().includes(query)  // ← searchable too
-          )
-        : students;
+            (s.collectedBy || '').toLowerCase().includes(query) ||
+            s.year.includes(query);
+        return matchesYear && matchesQuery;
+    });
 
     if (toDisplay.length === 0) {
         studentsTable.innerHTML = `
@@ -406,6 +518,7 @@ function renderStudentsTable(searchQuery = '') {
         const sheetTag = s.feeLabel === 'Membership Fee'
             ? `<span style="background:#EFF6FF;color:#1E3A8A;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #2563EB;">MEM</span>`
             : `<span style="background:#FEF2F2;color:#7F1D1D;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #DC2626;">SD</span>`;
+        const yearBadge = `<span style="background:#F3F4F6;color:#374151;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #D1D5DB;margin-left:4px;">${s.year}</span>`;
         return `
             <tr>
                 <td style="padding:16px 24px;">${s.idNumber}</td>
@@ -414,7 +527,7 @@ function renderStudentsTable(searchQuery = '') {
                 <td style="padding:16px 24px;">${s.firstName}</td>
                 <td style="padding:16px 24px;">${s.date}</td>
                 <td style="padding:16px 24px;">${s.scholarshipType}</td>
-                <td style="padding:16px 24px;">${sheetTag} ₱${s.fee}</td>
+                <td style="padding:16px 24px;">${sheetTag}${yearBadge} ₱${s.fee}</td>
                 <td style="padding:16px 24px;">👤 ${s.collectedBy !== 'N/A' ? s.collectedBy : '—'}</td>
                 <td style="padding:16px 24px;">
                     <span style="padding:4px 12px;border-radius:9999px;font-size:0.75rem;font-weight:700;background:#d1fae5;color:#065f46;border:2px solid #10b981;">✓ PAID</span>
@@ -451,16 +564,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     studentsTable  = document.getElementById('studentsTable');
     cancelEdit     = document.getElementById('cancelEdit');
 
-    // Update placeholder text
     if (searchInput) {
         searchInput.placeholder = 'Enter your ID Number (e.g. 2023-2445)...';
     }
 
-    // Update search header text
     const searchHeaderP = document.querySelector('.search-header p');
     if (searchHeaderP) searchHeaderP.textContent = 'Enter your ID Number to check payment status';
 
-    // Event listeners
     if (adminBtn)    adminBtn.addEventListener('click', () => window.location.href = 'login.html');
     if (backToHome)  backToHome.addEventListener('click', showStudentView);
     if (homeBtn)     homeBtn.addEventListener('click', showStudentView);
@@ -478,7 +588,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (studentForm) studentForm.addEventListener('submit', (e) => { e.preventDefault(); });
     if (cancelEdit)  cancelEdit.addEventListener('click', clearForm);
 
-    // Admin search
     const adminSearchInput = document.getElementById('adminSearchInput');
     if (adminSearchInput) {
         adminSearchInput.addEventListener('input', () => renderStudentsTable(adminSearchInput.value));
@@ -486,13 +595,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     initScrollZoom();
 
-    // Check for admin param
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true' && checkAuthentication()) {
         showAdminPanel();
     }
 
-    // Load data from both sheets
     await loadStudentsFromSheets();
 });
 
