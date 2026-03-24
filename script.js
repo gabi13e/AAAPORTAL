@@ -3,10 +3,11 @@
 // ============================================
 
 const GOOGLE_SHEETS_CONFIG = {
-    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',
+    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
-    COMBINED_SHEET: "AAA MEMBERSHIP FEE AND SCHOLAR'S DAY FEE",
-    CELL_RANGE: 'A:I'
+    MEMBERSHIP_SHEET:   'MEMBERSHIP FEE',
+    SCHOLARS_DAY_SHEET: "SCHOLAR'S DAY FEE",
+    CELL_RANGE: 'A:I'  // Extended to column I to include Collected By
 };
 
 // ============================================
@@ -15,7 +16,7 @@ const GOOGLE_SHEETS_CONFIG = {
 
 let membershipStudents = [];
 let scholarsDayStudents = [];
-let students = [];
+let students = []; // combined / used for admin table
 let isLoading = false;
 
 // ============================================
@@ -36,9 +37,7 @@ function checkAuthentication() {
         try {
             const data = JSON.parse(session);
             return data.isLoggedIn === true;
-        } catch (e) {
-            return false;
-        }
+        } catch (e) { return false; }
     }
     return false;
 }
@@ -58,74 +57,29 @@ async function fetchSheet(sheetName) {
     const escapedName = sheetName.replace(/'/g, "''");
     const range = `'${escapedName}'!${GOOGLE_SHEETS_CONFIG.CELL_RANGE}`;
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(range)}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
-
     const response = await fetch(url);
     if (!response.ok) {
         const errText = await response.text();
         throw new Error(`HTTP ${response.status}: ${errText}`);
     }
-
     return response.json();
 }
 
-function parseCombinedRows(data) {
-    if (!data.values || data.values.length < 3) {
-        return { membership: [], scholarsDay: [] };
-    }
-
-    const membership = [];
-    const scholarsDay = [];
-
-    // Row 0 = grouped header
-    // Row 1 = actual column labels
-    // Row 2 onward = data
-    data.values.slice(2).forEach(row => {
-        const lastName        = (row[0] || '').trim(); // A
-        const firstName       = (row[1] || '').trim(); // B
-        const idNumber        = (row[2] || '').trim(); // C
-        const scholarshipType = (row[3] || '').trim(); // D
-
-        const memReceipt      = (row[4] || '').trim(); // E
-        const memAmount       = (row[5] || '').trim(); // F
-        const sdReceipt       = (row[6] || '').trim(); // G
-        const sdAmount        = (row[7] || '').trim(); // H
-        const collectedBy     = (row[8] || 'N/A').trim(); // I
-
-        // Skip rows with no actual student info
-        if (!idNumber && !lastName && !firstName) return;
-
-        // Membership Fee record
-        if (memReceipt || memAmount) {
-            membership.push({
-                idNumber: idNumber || 'N/A',
-                receiptNumber: memReceipt || 'N/A',
-                lastName: lastName || 'N/A',
-                firstName: firstName || 'N/A',
-                date: 'N/A', // no date column in this sheet
-                scholarshipType: scholarshipType || 'N/A',
-                fee: memAmount || 'N/A',
-                collectedBy: collectedBy || 'N/A',
-                feeLabel: 'Membership Fee'
-            });
-        }
-
-        // Scholar's Day Fee record
-        if (sdReceipt || sdAmount) {
-            scholarsDay.push({
-                idNumber: idNumber || 'N/A',
-                receiptNumber: sdReceipt || 'N/A',
-                lastName: lastName || 'N/A',
-                firstName: firstName || 'N/A',
-                date: 'N/A', // no date column in this sheet
-                scholarshipType: scholarshipType || 'N/A',
-                fee: sdAmount || 'N/A',
-                collectedBy: collectedBy || 'N/A',
-                feeLabel: "Scholar's Day Fee"
-            });
-        }
-    });
-
-    return { membership, scholarsDay };
+function parseRows(data, feeLabel) {
+    if (!data.values || data.values.length < 2) return [];
+    return data.values.slice(1)
+        .filter(row => row[0])
+        .map(row => ({
+            idNumber:       (row[0] || '').trim(),
+            receiptNumber:  (row[1] || 'N/A').trim(),
+            lastName:       (row[2] || '').trim(),
+            firstName:      (row[3] || '').trim(),
+            date:           (row[4] || 'N/A').trim(),
+            scholarshipType:(row[5] || 'N/A').trim(),
+            fee:            (row[6] || 'N/A').trim(),
+            collectedBy:    (row[7] || 'N/A').trim(),   // ← NEW: Column H
+            feeLabel:       feeLabel
+        }));
 }
 
 async function loadStudentsFromSheets() {
@@ -133,21 +87,21 @@ async function loadStudentsFromSheets() {
     showToast('Loading student data...', '#3b82f6', 99999);
 
     try {
-        const data = await fetchSheet(GOOGLE_SHEETS_CONFIG.COMBINED_SHEET);
-        const parsed = parseCombinedRows(data);
+        const [memData, sdData] = await Promise.all([
+            fetchSheet(GOOGLE_SHEETS_CONFIG.MEMBERSHIP_SHEET),
+            fetchSheet(GOOGLE_SHEETS_CONFIG.SCHOLARS_DAY_SHEET)
+        ]);
 
-        membershipStudents = parsed.membership;
-        scholarsDayStudents = parsed.scholarsDay;
+        membershipStudents  = parseRows(memData,  'Membership Fee');
+        scholarsDayStudents = parseRows(sdData,   "Scholar's Day Fee");
         students = [...membershipStudents, ...scholarsDayStudents];
 
         console.log(`✅ Loaded ${membershipStudents.length} membership + ${scholarsDayStudents.length} scholar's day records`);
-
         hideToast();
 
         if (adminSection && adminSection.style.display !== 'none') {
             renderStudentsTable();
         }
-
         return true;
     } catch (error) {
         console.error('❌ Error loading from Google Sheets:', error.message);
@@ -163,44 +117,12 @@ async function loadStudentsFromSheets() {
 
 function loadSampleData() {
     membershipStudents = [
-        {
-            idNumber: '2023-001',
-            receiptNumber: 'MF-0001',
-            lastName: 'Dela Cruz',
-            firstName: 'Juan',
-            date: 'N/A',
-            scholarshipType: 'Academic Scholar',
-            fee: '25',
-            collectedBy: 'Maria Santos',
-            feeLabel: 'Membership Fee'
-        },
-        {
-            idNumber: '2023-002',
-            receiptNumber: 'MF-0002',
-            lastName: 'Santos',
-            firstName: 'Maria',
-            date: 'N/A',
-            scholarshipType: 'Sports Scholar',
-            fee: '25',
-            collectedBy: 'Juan Dela Cruz',
-            feeLabel: 'Membership Fee'
-        }
+        { idNumber:'2023-001', receiptNumber:'1', lastName:'Dela Cruz', firstName:'Juan', date:'2025-01-01', scholarshipType:'Academic Scholar', fee:'25', collectedBy:'Maria Santos', feeLabel:'Membership Fee' },
+        { idNumber:'2023-002', receiptNumber:'2', lastName:'Santos',    firstName:'Maria',date:'2025-01-02', scholarshipType:'Sports Scholar',    fee:'25', collectedBy:'Juan Dela Cruz', feeLabel:'Membership Fee' },
     ];
-
     scholarsDayStudents = [
-        {
-            idNumber: '2023-001',
-            receiptNumber: 'SD-0001',
-            lastName: 'Dela Cruz',
-            firstName: 'Juan',
-            date: 'N/A',
-            scholarshipType: 'Academic Scholar',
-            fee: '50',
-            collectedBy: 'Anna Reyes',
-            feeLabel: "Scholar's Day Fee"
-        }
+        { idNumber:'2023-001', receiptNumber:'5', lastName:'Dela Cruz', firstName:'Juan', date:'2025-02-10', scholarshipType:'Academic Scholar', fee:'50', collectedBy:'Anna Reyes', feeLabel:"Scholar's Day Fee" },
     ];
-
     students = [...membershipStudents, ...scholarsDayStudents];
 }
 
@@ -209,11 +131,7 @@ function loadSampleData() {
 // ============================================
 
 function showAdminPanel() {
-    if (!checkAuthentication()) {
-        window.location.href = 'login.html';
-        return;
-    }
-
+    if (!checkAuthentication()) { window.location.href = 'login.html'; return; }
     heroSection.style.display = 'none';
     adminSection.style.display = 'block';
     renderStudentsTable();
@@ -223,25 +141,21 @@ function showAdminPanel() {
 function showStudentView() {
     adminSection.style.display = 'none';
     heroSection.style.display = 'block';
-
     if (searchResults) {
         searchResults.style.display = 'none';
     }
-
     clearForm();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function addLogoutButton() {
     if (document.getElementById('logoutBtn')) return;
-
     const logoutBtn = document.createElement('button');
     logoutBtn.id = 'logoutBtn';
     logoutBtn.className = 'nav-btn';
     logoutBtn.style.cssText = 'background:#dc2626;color:#fff;margin-left:12px;';
     logoutBtn.innerHTML = '🚪 Logout';
     logoutBtn.addEventListener('click', logout);
-
     backToHome.parentElement.insertBefore(logoutBtn, backToHome.nextSibling);
 }
 
@@ -254,24 +168,11 @@ let toastTimer = null;
 
 function showToast(message, color = '#3b82f6', duration = 3000) {
     hideToast();
-
     toastEl = document.createElement('div');
     toastEl.id = 'toastMessage';
-    toastEl.style.cssText = `
-        position:fixed;
-        top:20px;
-        right:20px;
-        background:${color};
-        color:#fff;
-        padding:16px 24px;
-        border-radius:12px;
-        box-shadow:0 4px 6px rgba(0,0,0,0.15);
-        z-index:10000;
-        font-weight:600;
-    `;
+    toastEl.style.cssText = `position:fixed;top:20px;right:20px;background:${color};color:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.15);z-index:10000;font-weight:600;`;
     toastEl.textContent = message;
     document.body.appendChild(toastEl);
-
     if (duration < 99999) {
         toastTimer = setTimeout(hideToast, duration);
     }
@@ -279,10 +180,7 @@ function showToast(message, color = '#3b82f6', duration = 3000) {
 
 function hideToast() {
     if (toastTimer) clearTimeout(toastTimer);
-    if (toastEl) {
-        toastEl.remove();
-        toastEl = null;
-    }
+    if (toastEl) { toastEl.remove(); toastEl = null; }
 }
 
 // ============================================
@@ -301,14 +199,11 @@ function performSearch() {
 
     const queryLower = query.toLowerCase();
 
-    const memMatches = membershipStudents.filter(
-        s => (s.idNumber || '').toLowerCase() === queryLower
-    );
+    // Find all matching records across BOTH sheets by ID number only
+    const memMatches = membershipStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
+    const sdMatches  = scholarsDayStudents.filter(s => s.idNumber.toLowerCase() === queryLower);
 
-    const sdMatches = scholarsDayStudents.filter(
-        s => (s.idNumber || '').toLowerCase() === queryLower
-    );
-
+    // Show button loading state
     searchBtn.innerHTML = `<span>Searching...</span>`;
     searchBtn.disabled = true;
 
@@ -317,8 +212,7 @@ function performSearch() {
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <span>Search Payment</span>
-        `;
+            <span>Search Payment</span>`;
         searchBtn.disabled = false;
 
         if (memMatches.length === 0 && sdMatches.length === 0) {
@@ -334,11 +228,12 @@ function performSearch() {
 // ============================================
 
 function displayStudentInfo(idNumber, memMatches, sdMatches) {
+
     const displayId = (memMatches[0] || sdMatches[0])?.idNumber || idNumber;
 
+    // Build fee card rows — now includes Collected By
     const buildRows = (matches, feeLabel, borderColor, bgColor, textColor) => {
         if (matches.length === 0) return '';
-
         return matches.map(m => `
             <div style="background:${bgColor};border:2px solid ${borderColor};border-radius:16px;padding:20px;margin-bottom:12px;">
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
@@ -362,7 +257,7 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                     <div></div>
                     <div>
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Amount Paid</div>
-                        <div style="font-weight:800;color:${textColor};font-size:1.1rem;">${m.fee !== 'N/A' ? `₱ ${m.fee}` : 'N/A'}</div>
+                        <div style="font-weight:800;color:${textColor};font-size:1.1rem;">₱ ${m.fee}</div>
                     </div>
                     <div>
                         <div style="font-size:0.8rem;font-weight:600;color:${textColor};opacity:0.7;margin-bottom:2px;">Status</div>
@@ -377,25 +272,28 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
         `).join('');
     };
 
-    const membershipHTML = buildRows(memMatches, 'Membership Fee', '#2563EB', '#EFF6FF', '#1E3A8A');
-    const scholarsDayHTML = buildRows(sdMatches, "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
+    const membershipHTML  = buildRows(memMatches, 'Membership Fee',    '#2563EB', '#EFF6FF', '#1E3A8A');
+    const scholarsDayHTML = buildRows(sdMatches,  "Scholar's Day Fee", '#DC2626', '#FEF2F2', '#7F1D1D');
 
+    // Not-paid placeholder cards
     const memNotPaid = `
         <div style="background:#EFF6FF;border:2px dashed #2563EB;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
             <div style="font-weight:800;color:#1E3A8A;margin-bottom:4px;">Membership Fee</div>
             <div style="color:#3B82F6;font-size:0.9rem;">No payment record found</div>
-        </div>
-    `;
-
+        </div>`;
     const sdNotPaid = `
         <div style="background:#FEF2F2;border:2px dashed #DC2626;border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;">
+            <div style="font-size:1.5rem;margin-bottom:6px;"></div>
             <div style="font-weight:800;color:#7F1D1D;margin-bottom:4px;">Scholar's Day Fee</div>
             <div style="color:#EF4444;font-size:0.9rem;">No payment record found</div>
-        </div>
-    `;
+        </div>`;
 
-    const bothPaid = memMatches.length > 0 && sdMatches.length > 0;
-    const missingFee = memMatches.length === 0 ? 'Membership Fee' : "Scholar's Day Fee";
+    // Determine overall status
+    const bothPaid    = memMatches.length > 0 && sdMatches.length > 0;
+    const missingFee  = memMatches.length === 0
+        ? 'Membership Fee'
+        : "Scholar's Day Fee";
 
     const overallStatusCard = bothPaid ? `
         <div class="payment-status-card">
@@ -433,6 +331,7 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
 
     studentInfo.innerHTML = `
         <div class="payment-verified-container">
+            <!-- Header -->
             <div class="payment-verified-header">
                 <div class="payment-verified-badge">
                     <div class="payment-verified-icon">
@@ -445,12 +344,14 @@ function displayStudentInfo(idNumber, memMatches, sdMatches) {
                 <div class="payment-receipt-number">ID: ${displayId}</div>
             </div>
 
+            <!-- Fee Records -->
             <div style="margin-bottom:16px;">
                 <div style="font-weight:700;color:#065F46;margin-bottom:12px;font-size:0.95rem;">📋 Payment Records</div>
-                ${membershipHTML || memNotPaid}
+                ${membershipHTML  || memNotPaid}
                 ${scholarsDayHTML || sdNotPaid}
             </div>
 
+            <!-- Overall Status -->
             ${overallStatusCard}
         </div>
     `;
@@ -479,29 +380,25 @@ function displayNoResults(query) {
 // ============================================
 
 function renderStudentsTable(searchQuery = '') {
-    const query = (searchQuery || '').toLowerCase();
-
+    const query = searchQuery.toLowerCase();
     const toDisplay = query
         ? students.filter(s =>
-            (s.idNumber || '').toLowerCase().includes(query) ||
-            (s.lastName || '').toLowerCase().includes(query) ||
-            (s.firstName || '').toLowerCase().includes(query) ||
-            (s.receiptNumber || '').toLowerCase().includes(query) ||
-            (s.scholarshipType || '').toLowerCase().includes(query) ||
-            (s.feeLabel || '').toLowerCase().includes(query) ||
-            (s.collectedBy || '').toLowerCase().includes(query)
-        )
+            s.idNumber.toLowerCase().includes(query) ||
+            s.lastName.toLowerCase().includes(query) ||
+            s.firstName.toLowerCase().includes(query) ||
+            s.receiptNumber.toLowerCase().includes(query) ||
+            s.scholarshipType.toLowerCase().includes(query) ||
+            s.feeLabel.toLowerCase().includes(query) ||
+            (s.collectedBy || '').toLowerCase().includes(query)  // ← searchable too
+          )
         : students;
 
     if (toDisplay.length === 0) {
         studentsTable.innerHTML = `
-            <tr>
-                <td colspan="9" style="padding:32px;text-align:center;color:#6b7280;">
-                    <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
-                    <p style="font-weight:700;">No records found</p>
-                </td>
-            </tr>
-        `;
+            <tr><td colspan="9" style="padding:32px;text-align:center;color:#6b7280;">
+                <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+                <p style="font-weight:700;">No records found</p>
+            </td></tr>`;
         return;
     }
 
@@ -509,7 +406,6 @@ function renderStudentsTable(searchQuery = '') {
         const sheetTag = s.feeLabel === 'Membership Fee'
             ? `<span style="background:#EFF6FF;color:#1E3A8A;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #2563EB;">MEM</span>`
             : `<span style="background:#FEF2F2;color:#7F1D1D;padding:2px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;border:1px solid #DC2626;">SD</span>`;
-
         return `
             <tr>
                 <td style="padding:16px 24px;">${s.idNumber}</td>
@@ -518,23 +414,19 @@ function renderStudentsTable(searchQuery = '') {
                 <td style="padding:16px 24px;">${s.firstName}</td>
                 <td style="padding:16px 24px;">${s.date}</td>
                 <td style="padding:16px 24px;">${s.scholarshipType}</td>
-                <td style="padding:16px 24px;">${sheetTag} ${s.fee !== 'N/A' ? `₱${s.fee}` : '—'}</td>
+                <td style="padding:16px 24px;">${sheetTag} ₱${s.fee}</td>
                 <td style="padding:16px 24px;">👤 ${s.collectedBy !== 'N/A' ? s.collectedBy : '—'}</td>
                 <td style="padding:16px 24px;">
                     <span style="padding:4px 12px;border-radius:9999px;font-size:0.75rem;font-weight:700;background:#d1fae5;color:#065f46;border:2px solid #10b981;">✓ PAID</span>
                 </td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
 }
 
 function clearForm() {
     if (studentForm) {
         studentForm.reset();
-
-        const editId = document.getElementById('editId');
-        if (editId) editId.value = '';
-
+        document.getElementById('editId').value = '';
         if (cancelEdit) cancelEdit.classList.add('hidden');
     }
 }
@@ -546,58 +438,47 @@ window.performSearch = performSearch;
 // ============================================
 
 window.addEventListener('DOMContentLoaded', async () => {
-    heroSection = document.getElementById('heroSection');
-    adminSection = document.getElementById('adminSection');
-    adminBtn = document.getElementById('adminBtn');
-    backToHome = document.getElementById('backToHome');
-    homeBtn = document.getElementById('homeBtn');
-    searchInput = document.getElementById('searchInput');
-    searchBtn = document.getElementById('searchBtn');
-    searchResults = document.getElementById('searchResults');
-    studentInfo = document.getElementById('studentInfo');
-    studentForm = document.getElementById('studentForm');
-    studentsTable = document.getElementById('studentsTable');
-    cancelEdit = document.getElementById('cancelEdit');
+    heroSection    = document.getElementById('heroSection');
+    adminSection   = document.getElementById('adminSection');
+    adminBtn       = document.getElementById('adminBtn');
+    backToHome     = document.getElementById('backToHome');
+    homeBtn        = document.getElementById('homeBtn');
+    searchInput    = document.getElementById('searchInput');
+    searchBtn      = document.getElementById('searchBtn');
+    searchResults  = document.getElementById('searchResults');
+    studentInfo    = document.getElementById('studentInfo');
+    studentForm    = document.getElementById('studentForm');
+    studentsTable  = document.getElementById('studentsTable');
+    cancelEdit     = document.getElementById('cancelEdit');
 
+    // Update placeholder text
     if (searchInput) {
         searchInput.placeholder = 'Enter your ID Number (e.g. 2023-2445)...';
     }
 
+    // Update search header text
     const searchHeaderP = document.querySelector('.search-header p');
-    if (searchHeaderP) {
-        searchHeaderP.textContent = 'Enter your ID Number to check payment status';
-    }
+    if (searchHeaderP) searchHeaderP.textContent = 'Enter your ID Number to check payment status';
 
-    if (adminBtn) adminBtn.addEventListener('click', () => window.location.href = 'login.html');
-    if (backToHome) backToHome.addEventListener('click', showStudentView);
-    if (homeBtn) homeBtn.addEventListener('click', showStudentView);
+    // Event listeners
+    if (adminBtn)    adminBtn.addEventListener('click', () => window.location.href = 'login.html');
+    if (backToHome)  backToHome.addEventListener('click', showStudentView);
+    if (homeBtn)     homeBtn.addEventListener('click', showStudentView);
 
     if (searchBtn) {
-        searchBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            performSearch();
-        });
+        searchBtn.addEventListener('click', (e) => { e.preventDefault(); performSearch(); });
     }
 
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performSearch();
-            }
+            if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
         });
     }
 
-    if (studentForm) {
-        studentForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-        });
-    }
+    if (studentForm) studentForm.addEventListener('submit', (e) => { e.preventDefault(); });
+    if (cancelEdit)  cancelEdit.addEventListener('click', clearForm);
 
-    if (cancelEdit) {
-        cancelEdit.addEventListener('click', clearForm);
-    }
-
+    // Admin search
     const adminSearchInput = document.getElementById('adminSearchInput');
     if (adminSearchInput) {
         adminSearchInput.addEventListener('input', () => renderStudentsTable(adminSearchInput.value));
@@ -605,11 +486,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     initScrollZoom();
 
+    // Check for admin param
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === 'true' && checkAuthentication()) {
         showAdminPanel();
     }
 
+    // Load data from both sheets
     await loadStudentsFromSheets();
 });
 
@@ -624,26 +507,24 @@ function initScrollZoom() {
     window.addEventListener('scroll', () => {
         if (searchResults && searchResults.style.display === 'block') {
             searchCard.style.transform = 'scale(1)';
-            searchCard.style.opacity = '1';
+            searchCard.style.opacity   = '1';
             return;
         }
-
-        const cardRect = searchCard.getBoundingClientRect();
+        const cardRect     = searchCard.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        const cardCenter = cardRect.top + cardRect.height / 2;
+        const cardCenter   = cardRect.top + cardRect.height / 2;
         const distFromCenter = Math.abs(cardCenter - windowHeight / 2);
-        const maxDistance = windowHeight / 2 + cardRect.height / 2;
-        const ratio = 1 - distFromCenter / maxDistance;
+        const maxDistance    = windowHeight / 2 + cardRect.height / 2;
+        const ratio          = 1 - distFromCenter / maxDistance;
 
         if (cardRect.top < windowHeight && cardRect.bottom > 0) {
             searchCard.style.transform = `scale(${Math.max(0.95, Math.min(1.05, 0.95 + ratio * 0.1))})`;
-            searchCard.style.opacity = Math.max(0.7, Math.min(1, 0.7 + ratio * 0.3));
+            searchCard.style.opacity   = Math.max(0.7, Math.min(1, 0.7 + ratio * 0.3));
         } else {
             searchCard.style.transform = 'scale(0.95)';
-            searchCard.style.opacity = '0.7';
+            searchCard.style.opacity   = '0.7';
         }
     });
-
     window.dispatchEvent(new Event('scroll'));
 }
 
@@ -658,16 +539,10 @@ function customAlert(message, type = 'info') {
     const icons = {
         warning: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`,
         success: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-        error: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-        info: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+        error:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        info:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
     };
-
-    const titles = {
-        warning: 'Attention Required',
-        success: 'Success',
-        error: 'Error',
-        info: 'Information'
-    };
+    const titles = { warning:'Attention Required', success:'Success', error:'Error', info:'Information' };
 
     const overlay = document.createElement('div');
     overlay.className = 'custom-modal-overlay';
@@ -679,20 +554,11 @@ function customAlert(message, type = 'info') {
                 <p class="custom-modal-message">${message}</p>
                 <button class="custom-modal-button">OK</button>
             </div>
-        </div>
-    `;
-
+        </div>`;
     document.body.appendChild(overlay);
-
     overlay.querySelector('.custom-modal-button').addEventListener('click', () => overlay.remove());
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) overlay.remove();
-    });
-
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     document.addEventListener('keydown', function esc(e) {
-        if (e.key === 'Escape') {
-            overlay.remove();
-            document.removeEventListener('keydown', esc);
-        }
+        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
     });
 }
