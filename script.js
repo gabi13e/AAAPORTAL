@@ -2,12 +2,15 @@
 // GOOGLE SHEETS CONFIGURATION
 // ============================================
 
+// ============================================
+// GOOGLE SHEETS CONFIGURATION
+// ============================================
+
 const GOOGLE_SHEETS_CONFIG = {
-    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',  
+    SHEET_ID: '1lQdjiJva9PDbCP-6zaoIix0Nls2QFXIX2rHo10iQlHo',
     API_KEY: 'AIzaSyBWZvwamQd4a112gPHiBEb1ciJ9WDfOH2I',
-    MEMBERSHIP_SHEET:   'MEMBERSHIP FEE',
-    SCHOLARS_DAY_SHEET: "SCHOLAR'S DAY FEE",
-    CELL_RANGE: 'A:I'  // Extended to column I to include Collected By
+    COMBINED_SHEET: "AAA MEMBERSHIP FEE AND SCHOLAR'S DAY FEE",
+    CELL_RANGE: 'A:I'
 };
 
 // ============================================
